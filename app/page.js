@@ -6,7 +6,7 @@ export default function HomePage() {
           box-sizing: border-box;
         }
 
-        input, select, button {
+        input, select, textarea, button {
           width: 100%;
           max-width: 100%;
         }
@@ -45,6 +45,15 @@ export default function HomePage() {
             type="tel"
             placeholder="Enter phone number"
             style={styles.input}
+          />
+
+          {/* Optional Frame Text */}
+          <label style={styles.label}>
+            Text on Frame <span style={styles.optional}>(optional)</span>
+          </label>
+          <textarea
+            placeholder="Eg: Forever in our hearts"
+            style={styles.textarea}
           />
 
           {/* Upload Image */}
@@ -128,11 +137,26 @@ const styles = {
     fontWeight: 600,
   },
 
+  optional: {
+    fontWeight: 400,
+    color: "#777",
+    fontSize: 12,
+  },
+
   input: {
     padding: 12,
     borderRadius: 8,
     border: "1px solid #ccc",
     fontSize: 14,
+  },
+
+  textarea: {
+    padding: 12,
+    borderRadius: 8,
+    border: "1px solid #ccc",
+    fontSize: 14,
+    minHeight: 70,
+    resize: "vertical",
   },
 
   button: {
