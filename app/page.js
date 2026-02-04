@@ -1,100 +1,78 @@
 export default function HomePage() {
   return (
     <>
-      {/* GLOBAL RESPONSIVE STYLES */}
       <style>{`
         * {
           box-sizing: border-box;
         }
 
         input, select, button {
+          width: 100%;
           max-width: 100%;
         }
 
-        @media (max-width: 768px) {
-          .hero-title {
-            font-size: 22px;
-          }
-
-          .brand {
-            font-size: 26px;
-          }
-
-          .card {
-            padding: 18px;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .hero-title {
-            font-size: 20px;
-          }
-
-          .hero-desc {
-            font-size: 14px;
+        @media (max-width: 600px) {
+          .title {
+            font-size: 24px;
           }
         }
       `}</style>
 
       <main style={styles.wrapper}>
-        {/* Header */}
+        {/* Brand */}
         <header style={styles.header}>
-          <h1 className="brand" style={styles.brand}>
-            WHAT THE FRAME
-          </h1>
-          <p style={styles.tagline}>
-            Internal Sales Tool · AI Engraving Mockups
+          <h1 className="title" style={styles.title}>WHAT THE FRAME</h1>
+          <p style={styles.subtitle}>
+            Engraving Mockup Generator · Internal Sales Tool
           </p>
         </header>
 
-        {/* Hero */}
-        <section style={styles.hero}>
-          <h2 className="hero-title" style={styles.heroTitle}>
-            Create Engraving Mockups in Seconds
-          </h2>
-          <p className="hero-desc" style={styles.heroDesc}>
-            Add customer details, generate multiple mockup styles,
-            and send previews instantly via WhatsApp.
-          </p>
-        </section>
-
         {/* Form Card */}
-        <section className="card" style={styles.card}>
-          <h3 style={styles.cardTitle}>Customer Details</h3>
+        <section style={styles.card}>
+          <h2 style={styles.cardTitle}>Create Mockup</h2>
 
+          {/* Customer Name */}
           <label style={styles.label}>Customer Name</label>
           <input
+            type="text"
             placeholder="Enter customer name"
             style={styles.input}
           />
 
-          <label style={styles.label}>Text on Frame (Optional)</label>
+          {/* Phone Number */}
+          <label style={styles.label}>Customer Phone Number</label>
           <input
-            placeholder="Eg: Forever in our hearts"
+            type="tel"
+            placeholder="Enter phone number"
             style={styles.input}
           />
 
-          <label style={styles.label}>Select Frame Type</label>
+          {/* Upload Image */}
+          <label style={styles.label}>Upload Customer Image</label>
+          <input
+            type="file"
+            accept="image/*"
+            style={styles.input}
+          />
+
+          {/* Design Type */}
+          <label style={styles.label}>Select Design Style</label>
           <select style={styles.input}>
-            <option>Classic Wooden Frame</option>
-            <option>Modern Black Frame</option>
-            <option>Golden Memorial Frame</option>
+            <option value="">Select style</option>
+            <option>Ghibli Style</option>
+            <option>Pencil Sketch</option>
+            <option>Premium Engraving</option>
+            <option>Minimal Line Art</option>
           </select>
 
-          <label style={styles.label}>Mockup Styles</label>
-          <div style={styles.checkboxRow}>
-            <label style={styles.checkbox}><input type="checkbox" /> Minimal</label>
-            <label style={styles.checkbox}><input type="checkbox" /> Premium</label>
-            <label style={styles.checkbox}><input type="checkbox" /> Artistic</label>
-          </div>
-
-          <button style={styles.primaryBtn}>
-            Generate Mockups
+          {/* Generate Button */}
+          <button style={styles.button}>
+            Generate Mockup
           </button>
         </section>
 
-        <p style={styles.footerHint}>
-          Mockups will be saved with a unique ID for follow-up.
+        <p style={styles.note}>
+          Mockups will be generated and saved for follow-up.
         </p>
       </main>
     </>
@@ -106,55 +84,34 @@ export default function HomePage() {
 const styles = {
   wrapper: {
     minHeight: "100vh",
-    background: "linear-gradient(180deg, #f8f9fb, #eef1f5)",
-    padding: "24px 12px",
-    fontFamily: "system-ui, -apple-system, sans-serif",
+    background: "#f5f6fa",
+    padding: "20px",
+    fontFamily: "system-ui, sans-serif",
   },
 
   header: {
     textAlign: "center",
-    marginBottom: 28,
+    marginBottom: 30,
   },
 
-  brand: {
-    fontSize: 30,
+  title: {
+    fontSize: 28,
     fontWeight: 800,
-    letterSpacing: "1px",
     marginBottom: 6,
   },
 
-  tagline: {
-    color: "#555",
+  subtitle: {
     fontSize: 14,
-  },
-
-  hero: {
-    maxWidth: "90vw",
-    width: 720,
-    margin: "0 auto 28px",
-    textAlign: "center",
-  },
-
-  heroTitle: {
-    fontSize: 26,
-    fontWeight: 700,
-    marginBottom: 10,
-  },
-
-  heroDesc: {
-    fontSize: 16,
-    color: "#444",
-    lineHeight: 1.5,
+    color: "#555",
   },
 
   card: {
-    maxWidth: "92vw",
-    width: 520,
+    maxWidth: 420,
     margin: "0 auto",
-    background: "#fff",
-    padding: 22,
-    borderRadius: 14,
-    boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
+    background: "#ffffff",
+    padding: 20,
+    borderRadius: 12,
+    boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
   },
 
   cardTitle: {
@@ -165,36 +122,22 @@ const styles = {
 
   label: {
     display: "block",
-    fontSize: 14,
-    fontWeight: 600,
     marginTop: 14,
     marginBottom: 6,
+    fontSize: 14,
+    fontWeight: 600,
   },
 
   input: {
-    width: "100%",
-    padding: "12px",
+    padding: 12,
     borderRadius: 8,
     border: "1px solid #ccc",
     fontSize: 14,
-    outline: "none",
   },
 
-  checkboxRow: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: 14,
-    marginTop: 8,
-  },
-
-  checkbox: {
-    fontSize: 14,
-  },
-
-  primaryBtn: {
+  button: {
     marginTop: 22,
-    width: "100%",
-    padding: "14px",
+    padding: 14,
     borderRadius: 10,
     border: "none",
     background: "#000",
@@ -204,9 +147,9 @@ const styles = {
     cursor: "pointer",
   },
 
-  footerHint: {
+  note: {
     textAlign: "center",
-    marginTop: 22,
+    marginTop: 18,
     fontSize: 13,
     color: "#666",
   },
