@@ -71,9 +71,8 @@ export default function OrderPage({ params }) {
         <div style={styles.section}>
           <label style={styles.label}>Product Type</label>
           <select style={styles.input}>
-            <option>Photo Frame</option>
-            <option>Wood Engraving</option>
-            <option>Memorial QR Frame</option>
+            <option>Frame Stand</option>
+            <option>Keychain</option>
           </select>
         </div>
 
