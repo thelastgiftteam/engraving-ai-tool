@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function RecentPage() {
   return (
     <main style={styles.wrapper}>
@@ -5,21 +7,27 @@ export default function RecentPage() {
       <header style={styles.header}>
         <h1 style={styles.title}>Recent Enquiries</h1>
         <p style={styles.subtitle}>
-          Previously generated mockups
+          Tap an enquiry to continue order creation
         </p>
       </header>
 
       {/* List */}
       <section style={styles.list}>
         {mockData.map((item) => (
-          <div key={item.uid} style={styles.card}>
-            <div>
-              <h3 style={styles.name}>{item.customer}</h3>
-              <p style={styles.uid}>UID: {item.uid}</p>
-            </div>
+          <Link
+            key={item.uid}
+            href={`/order/${item.uid}`}
+            style={styles.link}
+          >
+            <div style={styles.card}>
+              <div>
+                <h3 style={styles.name}>{item.customer}</h3>
+                <p style={styles.uid}>UID: {item.uid}</p>
+              </div>
 
-            <span style={styles.date}>{item.date}</span>
-          </div>
+              <span style={styles.date}>{item.date}</span>
+            </div>
+          </Link>
         ))}
       </section>
     </main>
@@ -68,6 +76,11 @@ const styles = {
     gap: 14,
   },
 
+  link: {
+    textDecoration: "none",
+    color: "inherit",
+  },
+
   card: {
     background: "#fff",
     padding: 16,
@@ -77,6 +90,7 @@ const styles = {
     justifyContent: "space-between",
     alignItems: "center",
     cursor: "pointer",
+    transition: "transform 0.1s ease, box-shadow 0.1s ease",
   },
 
   name: {
