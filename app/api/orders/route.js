@@ -1,45 +1,25 @@
-export async function GET(req, { params }) {
-  const uid = params.uid;
+export async function GET() {
+  if (!global.orders) global.orders = [];
 
-  const orders = global.orders || [];
-
-  const order = orders.find(
-    (o) => String(o.uid) === String(uid)
-  );
-
-  return Response.json({ order });
+  return Response.json({ orders: global.orders });
 }
 
-export async function PATCH(req, { params }) {
-  const uid = params.uid;
+export async function POST(req) {
   const body = await req.json();
 
   if (!global.orders) global.orders = [];
 
-  const order = global.orders.find(
-    (o) => String(o.uid) === String(uid)
-  );
+  const newOrder = {
+    uid: Date.now().toString(),
+    orderNumber: body.orderNumber,
+    teamMember: "",
+    images: (body.images || []).map((url) => ({
+      url,
+      status: "pending",
+    })),
+  };
 
-  if (!order) {
-    return Response.json({ success: false });
-  }
+  global.orders.unshift(newOrder);
 
-  // update team member
-  if (body.teamMember !== undefined) {
-    order.teamMember = body.teamMember;
-  }
-
-  // update image status
-  if (body.imageIndex !== undefined && body.status) {
-    if (!order.images[body.imageIndex].status) {
-      order.images[body.imageIndex] = {
-        url: order.images[body.imageIndex],
-        status: body.status,
-      };
-    } else {
-      order.images[body.imageIndex].status = body.status;
-    }
-  }
-
-  return Response.json({ success: true, order });
+  return Response.json({ success: true, order: newOrder });
 }
