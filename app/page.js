@@ -47,7 +47,7 @@ export default function Dashboard() {
         )}
 
         {orders.map((o) => (
-          <Link key={o.uid} href={`/order/${o.uid}`} style={styles.card}>
+<Link key={o.orderNumber} href={`/order/${o.orderNumber}`} style={styles.card}>
             <div style={styles.header}>
               <strong>Order #{o.orderNumber}</strong>
             </div>
