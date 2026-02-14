@@ -5,6 +5,7 @@ import { useState } from "react";
 export default function UploadPage() {
   const [orderId, setOrderId] = useState("");
   const [links, setLinks] = useState([""]);
+  const [loading, setLoading] = useState(false);
 
   function addField() {
     setLinks([...links, ""]);
@@ -16,8 +17,42 @@ export default function UploadPage() {
     setLinks(copy);
   }
 
-  function submit() {
-    alert("UI Ready — Order will be created later");
+  async function submit() {
+    if (!orderId) {
+      alert("Enter Order Number");
+      return;
+    }
+
+    const cleanLinks = links.filter((l) => l.trim() !== "");
+
+    if (cleanLinks.length === 0) {
+      alert("Add at least one image link");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await fetch("/api/orders", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          orderNumber: orderId,
+          images: cleanLinks,
+        }),
+      });
+
+      alert("Order Created Successfully ✅");
+
+      setOrderId("");
+      setLinks([""]);
+    } catch (err) {
+      alert("Failed creating order");
+    }
+
+    setLoading(false);
   }
 
   return (
@@ -31,7 +66,7 @@ export default function UploadPage() {
         style={styles.input}
       />
 
-      <h3>Design Image Links (Google Drive)</h3>
+      <h3 style={{ marginTop: 20 }}>Design Image Links (Google Drive)</h3>
 
       {links.map((l, i) => (
         <input
@@ -47,8 +82,12 @@ export default function UploadPage() {
         + Add Another Image
       </button>
 
-      <button onClick={submit} style={styles.createBtn}>
-        Create Order
+      <button
+        onClick={submit}
+        style={styles.createBtn}
+        disabled={loading}
+      >
+        {loading ? "Creating..." : "Create Order"}
       </button>
     </main>
   );
@@ -81,6 +120,7 @@ const styles = {
     borderRadius: 8,
     border: "1px solid #000",
     background: "#fff",
+    cursor: "pointer",
   },
 
   createBtn: {
@@ -90,5 +130,6 @@ const styles = {
     color: "#fff",
     borderRadius: 10,
     fontWeight: 700,
+    cursor: "pointer",
   },
 };
