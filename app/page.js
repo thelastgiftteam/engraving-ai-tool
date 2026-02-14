@@ -6,10 +6,25 @@ import Link from "next/link";
 export default function Dashboard() {
   const [orders, setOrders] = useState([]);
 
+  // Load Orders
   useEffect(() => {
-    fetch("/api/orders")
-      .then((r) => r.json())
-      .then((data) => setOrders(data.orders || []));
+    async function loadOrders() {
+      try {
+        const res = await fetch("/api/orders");
+        const data = await res.json();
+
+        // Support both formats just in case
+        if (Array.isArray(data)) {
+          setOrders(data);
+        } else {
+          setOrders(data.orders || []);
+        }
+      } catch (err) {
+        console.error("Failed loading orders", err);
+      }
+    }
+
+    loadOrders();
   }, []);
 
   return (
@@ -23,7 +38,14 @@ export default function Dashboard() {
         </Link>
       </div>
 
+      {/* Orders Grid */}
       <div style={styles.grid}>
+        {orders.length === 0 && (
+          <div style={styles.empty}>
+            No orders yet — upload a design to begin.
+          </div>
+        )}
+
         {orders.map((o) => (
           <Link key={o.uid} href={`/order/${o.uid}`} style={styles.card}>
             <div style={styles.header}>
@@ -31,7 +53,7 @@ export default function Dashboard() {
             </div>
 
             <div style={styles.meta}>
-              Images: {o.images?.length || 0}
+              Images Ready: {o.images?.length || 0}
             </div>
 
             <div style={styles.statusRow}>
@@ -39,10 +61,20 @@ export default function Dashboard() {
                 style={{
                   ...styles.dot,
                   background:
-                    o.status === "completed" ? "#22c55e" : "#f59e0b",
+                    o.status === "completed"
+                      ? "#22c55e"
+                      : o.engraver
+                      ? "#3b82f6"
+                      : "#f59e0b",
                 }}
               />
-              <span>{o.status}</span>
+              <span>
+                {o.status === "completed"
+                  ? "Completed"
+                  : o.engraver
+                  ? "In Progress"
+                  : "Pending"}
+              </span>
             </div>
 
             {o.engraver && (
@@ -104,6 +136,7 @@ const styles = {
     textDecoration: "none",
     color: "#000",
     border: "1px solid #eee",
+    transition: "0.2s",
   },
 
   header: {
@@ -134,5 +167,15 @@ const styles = {
     marginTop: 10,
     fontSize: 13,
     color: "#444",
+  },
+
+  empty: {
+    gridColumn: "1/-1",
+    textAlign: "center",
+    padding: 40,
+    color: "#888",
+    background: "#fff",
+    borderRadius: 12,
+    border: "1px dashed #ddd",
   },
 };
