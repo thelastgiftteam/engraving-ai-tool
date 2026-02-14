@@ -1,13 +1,17 @@
-export async function GET(req, { params }) {
-  const { uid } = params;
+export async function GET(request, context) {
+  const uid = context.params.uid;
 
-  // TEMP STORAGE (same mock data used in dashboard)
-  // Later we will move this to database
-  const globalOrders = global.orders || [];
+  // Temporary in-memory storage
+  const orders = global.orders || [];
 
-  const order = globalOrders.find(
+  const order = orders.find(
     (o) => String(o.uid) === String(uid)
   );
 
-  return Response.json({ order });
+  return new Response(
+    JSON.stringify({ order }),
+    {
+      headers: { "Content-Type": "application/json" },
+    }
+  );
 }
