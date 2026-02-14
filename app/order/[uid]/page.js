@@ -2,6 +2,21 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+function convertDrive(url) {
+  if (!url) return "";
+
+  // If already normal image, return as is
+  if (!url.includes("drive.google.com")) return url;
+
+  // Extract file id
+  const match = url.match(/\/d\/(.*?)\//);
+
+  if (match && match[1]) {
+    return `https://drive.google.com/uc?export=view&id=${match[1]}`;
+  }
+
+  return url;
+}
 
 export default function OrderPage({ params }) {
   const { uid } = params;
