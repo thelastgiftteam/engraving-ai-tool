@@ -1,15 +1,21 @@
 export const metadata = {
-  title: "What The Frame – Engraving Tool",
+  title: "What The Frame - Engraving Management",
+  description: "Order management system for custom wooden frame engraving",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html>
+    <html lang="en">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+          rel="stylesheet"
+        />
+      </head>
       <body style={styles.body}>
-        <header style={styles.header}>
-          <strong>What The Frame</strong>
-        </header>
-
         {children}
       </body>
     </html>
@@ -19,14 +25,9 @@ export default function RootLayout({ children }) {
 const styles = {
   body: {
     margin: 0,
-    background: "#f6f6f6",
-    fontFamily: "sans-serif",
-  },
-
-  header: {
-    padding: "14px 20px",
-    borderBottom: "1px solid #eee",
-    background: "#fff",
-    fontWeight: 700,
+    padding: 0,
+    fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+    WebkitFontSmoothing: "antialiased",
+    MozOsxFontSmoothing: "grayscale",
   },
 };
