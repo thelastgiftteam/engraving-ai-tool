@@ -3,179 +3,182 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
+/* ---------- TOP NAV ---------- */
+
+function TopNav() {
+  return (
+    <div style={styles.nav}>
+      <div style={styles.brand}>WHAT THE FRAME</div>
+
+      <div style={styles.navRight}>
+        <Link href="/upload" style={styles.navBtn}>
+          Upload Order
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- DASHBOARD ---------- */
+
 export default function Dashboard() {
   const [orders, setOrders] = useState([]);
 
-  // Load Orders
   useEffect(() => {
-    async function loadOrders() {
-      try {
-        const res = await fetch("/api/orders");
-        const data = await res.json();
-
-        // Support both formats just in case
-        if (Array.isArray(data)) {
-          setOrders(data);
-        } else {
-          setOrders(data.orders || []);
-        }
-      } catch (err) {
-        console.error("Failed loading orders", err);
-      }
-    }
-
-    loadOrders();
+    fetch("/api/orders")
+      .then((r) => r.json())
+      .then((data) => setOrders(data.orders || []));
   }, []);
 
+  function getStatus(o) {
+    if (!o.images || o.images.length === 0) return "pending";
+
+    const processing = o.images.some(
+      (img) =>
+        typeof img === "object" &&
+        img.status === "processing"
+    );
+
+    const completed = o.images.every(
+      (img) =>
+        typeof img === "object" &&
+        img.status === "completed"
+    );
+
+    if (completed) return "completed";
+    if (processing) return "processing";
+    return "pending";
+  }
+
   return (
-    <main style={styles.wrapper}>
-      <h1 style={styles.title}>WHAT THE FRAME</h1>
-      <p style={styles.subtitle}>Engraving Team Dashboard</p>
+    <main style={styles.page}>
+      <TopNav />
 
-      <div style={styles.topBar}>
-        <Link href="/upload" style={styles.uploadBtn}>
-          + New Design Upload
-        </Link>
-      </div>
+      <h2 style={styles.title}>Engraving Dashboard</h2>
 
-      {/* Orders Grid */}
       <div style={styles.grid}>
-        {orders.length === 0 && (
-          <div style={styles.empty}>
-            No orders yet — upload a design to begin.
-          </div>
-        )}
+        {orders.map((o) => {
+          const status = getStatus(o);
 
-        {orders.map((o) => (
-<Link key={o.orderNumber} href={`/order/${o.orderNumber}`} style={styles.card}>
-            <div style={styles.header}>
-              <strong>Order #{o.orderNumber}</strong>
-            </div>
-
-            <div style={styles.meta}>
-              Images Ready: {o.images?.length || 0}
-            </div>
-
-            <div style={styles.statusRow}>
-              <span
-                style={{
-                  ...styles.dot,
-                  background:
-                    o.status === "completed"
-                      ? "#22c55e"
-                      : o.engraver
-                      ? "#3b82f6"
-                      : "#f59e0b",
-                }}
-              />
-              <span>
-                {o.status === "completed"
-                  ? "Completed"
-                  : o.engraver
-                  ? "In Progress"
-                  : "Pending"}
-              </span>
-            </div>
-
-            {o.engraver && (
-              <div style={styles.engraver}>
-                Engraving by {o.engraver}
+          return (
+            <Link
+              key={o.uid}
+              href={`/order/${o.uid}`}
+              style={styles.card}
+            >
+              <div style={styles.cardHeader}>
+                <strong>Order #{o.orderNumber}</strong>
               </div>
-            )}
-          </Link>
-        ))}
+
+              <div style={styles.meta}>
+                Frames: {o.images?.length || 0}
+              </div>
+
+              <div style={styles.statusRow}>
+                <span style={styles.dot(status)} />
+
+                <span>
+                  {status === "processing"
+                    ? `Processing by ${o.teamMember || "Team"}`
+                    : status === "completed"
+                    ? "Completed"
+                    : "Pending"}
+                </span>
+              </div>
+            </Link>
+          );
+        })}
       </div>
     </main>
   );
 }
 
+/* ---------- STYLES ---------- */
+
 const styles = {
-  wrapper: {
+  page: {
     maxWidth: 1100,
-    margin: "40px auto",
+    margin: "0 auto",
     padding: 20,
   },
 
-  title: {
-    textAlign: "center",
-    fontSize: 32,
-    fontWeight: 800,
-  },
-
-  subtitle: {
-    textAlign: "center",
-    marginBottom: 30,
-    color: "#666",
-  },
-
-  topBar: {
+  nav: {
     display: "flex",
-    justifyContent: "flex-end",
-    marginBottom: 20,
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 30,
+    flexWrap: "wrap",
+    gap: 10,
   },
 
-  uploadBtn: {
-    padding: "10px 16px",
+  brand: {
+    fontWeight: 800,
+    fontSize: 18,
+  },
+
+  navRight: {
+    display: "flex",
+    gap: 10,
+  },
+
+  navBtn: {
     background: "#000",
     color: "#fff",
+    padding: "8px 14px",
     borderRadius: 10,
     textDecoration: "none",
     fontWeight: 600,
   },
 
+  title: {
+    fontSize: 22,
+    marginBottom: 20,
+    fontWeight: 700,
+  },
+
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))",
-    gap: 16,
+    gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))",
+    gap: 18,
   },
 
   card: {
-    padding: 16,
-    borderRadius: 14,
     background: "#fff",
+    borderRadius: 16,
+    padding: 18,
+    border: "1px solid #eee",
     textDecoration: "none",
     color: "#000",
-    border: "1px solid #eee",
-    transition: "0.2s",
+    display: "flex",
+    flexDirection: "column",
+    gap: 10,
   },
 
-  header: {
+  cardHeader: {
     fontSize: 18,
-    marginBottom: 6,
   },
 
   meta: {
-    fontSize: 14,
     color: "#666",
+    fontSize: 14,
   },
 
   statusRow: {
     display: "flex",
     alignItems: "center",
     gap: 8,
-    marginTop: 10,
     fontWeight: 600,
   },
 
-  dot: {
+  dot: (status) => ({
     width: 10,
     height: 10,
     borderRadius: 10,
-  },
-
-  engraver: {
-    marginTop: 10,
-    fontSize: 13,
-    color: "#444",
-  },
-
-  empty: {
-    gridColumn: "1/-1",
-    textAlign: "center",
-    padding: 40,
-    color: "#888",
-    background: "#fff",
-    borderRadius: 12,
-    border: "1px dashed #ddd",
-  },
+    background:
+      status === "completed"
+        ? "#22c55e"
+        : status === "processing"
+        ? "#3b82f6"
+        : "#f59e0b",
+  }),
 };
