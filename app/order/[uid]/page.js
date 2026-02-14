@@ -1,27 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
 
-export default function OrderPage() {
-  const params = useParams();
-  const orderId = params.uid;
+export default function OrderPage({ params }) {
+  const { uid } = params;
 
   const [order, setOrder] = useState(null);
 
   useEffect(() => {
-    if (!orderId) return;
+    async function load() {
+      const res = await fetch(`/api/orders/${uid}`); // ✅ PLURAL orders
+      const data = await res.json();
+      setOrder(data.order);
+    }
 
-    fetch(`/api/orders/${orderId}`)
-      .then((r) => r.json())
-      .then((data) => {
-        setOrder(data.order);
-      });
-  }, [orderId]);
+    load();
+  }, [uid]);
 
   if (!order) {
     return (
-      <main style={{ padding: 20 }}>
+      <main style={{ padding: 30 }}>
         <h2>Loading order...</h2>
       </main>
     );
@@ -31,24 +29,10 @@ export default function OrderPage() {
     <main style={styles.wrapper}>
       <h2 style={styles.title}>Order #{order.orderNumber}</h2>
 
-      <div style={styles.section}>
-        <strong>Status:</strong> {order.status}
-      </div>
-
-      {order.engraver && (
-        <div style={styles.section}>
-          Engraving by: {order.engraver}
-        </div>
-      )}
-
-      <h3 style={{ marginTop: 20 }}>Design Images</h3>
-
       <div style={styles.grid}>
         {order.images?.map((img, i) => (
           <div key={i} style={styles.card}>
-            <a href={img} target="_blank">
-              <img src={img} style={styles.image} />
-            </a>
+            <img src={img} style={styles.image} />
 
             <a href={img} target="_blank" style={styles.download}>
               Download Image
@@ -62,46 +46,40 @@ export default function OrderPage() {
 
 const styles = {
   wrapper: {
-    maxWidth: 1000,
+    maxWidth: 900,
     margin: "40px auto",
     padding: 20,
   },
 
   title: {
-    fontSize: 26,
     marginBottom: 20,
   },
 
-  section: {
-    marginTop: 10,
-  },
-
   grid: {
-    marginTop: 20,
     display: "grid",
     gridTemplateColumns: "repeat(auto-fill,minmax(220px,1fr))",
-    gap: 16,
+    gap: 20,
   },
 
   card: {
     background: "#fff",
+    padding: 14,
     borderRadius: 12,
-    padding: 12,
     border: "1px solid #eee",
   },
 
   image: {
     width: "100%",
     borderRadius: 10,
+    marginBottom: 10,
   },
 
   download: {
     display: "block",
-    marginTop: 10,
     background: "#000",
     color: "#fff",
     textAlign: "center",
-    padding: "8px",
+    padding: 8,
     borderRadius: 8,
     textDecoration: "none",
     fontWeight: 600,
