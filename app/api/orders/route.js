@@ -1,22 +1,13 @@
-let ORDERS = [];
+export async function GET(req, { params }) {
+  const { uid } = params;
 
-export async function GET() {
-  return Response.json(ORDERS);
-}
+  // TEMP STORAGE (same mock data used in dashboard)
+  // Later we will move this to database
+  const globalOrders = global.orders || [];
 
-export async function POST(req) {
-  const body = await req.json();
+  const order = globalOrders.find(
+    (o) => String(o.uid) === String(uid)
+  );
 
-  const newOrder = {
-    id: Date.now().toString(),
-    orderNumber: body.orderNumber,
-    images: body.images || [],
-    status: "pending",
-    engravingBy: null,
-    createdAt: new Date().toISOString(),
-  };
-
-  ORDERS.unshift(newOrder);
-
-  return Response.json(newOrder);
+  return Response.json({ order });
 }
