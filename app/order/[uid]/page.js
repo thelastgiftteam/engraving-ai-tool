@@ -20,24 +20,30 @@ export default function OrderPage({ params }) {
 
   if (!order) {
     return (
-      <main style={styles.wrapper}>
+      <main style={styles.page}>
         <TopNav />
-        <h2>Loading order...</h2>
+        <div style={styles.loading}>Loading order...</div>
       </main>
     );
   }
 
   return (
-    <main style={styles.wrapper}>
+    <main style={styles.page}>
       <TopNav />
 
-      <div style={styles.headerBox}>
-        <h2 style={styles.title}>Order #{order.orderNumber}</h2>
+      {/* ORDER HEADER CARD */}
+      <div style={styles.headerCard}>
+        <div>
+          <h2 style={styles.orderTitle}>Order #{order.orderNumber}</h2>
+          <p style={styles.subText}>
+            Select team member and start processing images
+          </p>
+        </div>
 
         <select
           value={member}
           onChange={(e) => setMember(e.target.value)}
-          style={styles.select}
+          style={styles.memberSelect}
         >
           <option value="">Select Team Member</option>
           <option>Arjun</option>
@@ -46,22 +52,25 @@ export default function OrderPage({ params }) {
         </select>
       </div>
 
+      {/* IMAGE GRID */}
       <div style={styles.grid}>
         {order.images?.map((img, i) => (
           <div key={i} style={styles.card}>
             <img src={img} style={styles.image} />
 
-            <a href={img} target="_blank" style={styles.download}>
-              Download Image
-            </a>
+            <div style={styles.btnGroup}>
+              <a href={img} target="_blank" style={styles.download}>
+                Download
+              </a>
 
-            <button style={styles.startBtn}>
-              Start Processing
-            </button>
+              <button style={styles.startBtn}>
+                Start
+              </button>
 
-            <button style={styles.completeBtn}>
-              Mark Complete
-            </button>
+              <button style={styles.completeBtn}>
+                Complete
+              </button>
+            </div>
           </div>
         ))}
       </div>
@@ -69,7 +78,7 @@ export default function OrderPage({ params }) {
   );
 }
 
-/* ---------- TOP NAV BAR ---------- */
+/* ---------- NAV ---------- */
 
 function TopNav() {
   return (
@@ -94,7 +103,7 @@ function TopNav() {
 /* ---------- STYLES ---------- */
 
 const styles = {
-  wrapper: {
+  page: {
     maxWidth: 1100,
     margin: "0 auto",
     padding: 20,
@@ -118,48 +127,68 @@ const styles = {
 
   navRight: {
     display: "flex",
-    gap: 12,
+    gap: 10,
   },
 
   navBtn: {
-    padding: "8px 14px",
-    borderRadius: 10,
     background: "#000",
     color: "#fff",
+    padding: "8px 14px",
+    borderRadius: 10,
     textDecoration: "none",
     fontWeight: 600,
   },
 
-  headerBox: {
+  loading: {
+    padding: 40,
+    fontSize: 18,
+  },
+
+  /* HEADER CARD */
+
+  headerCard: {
+    background: "#fff",
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 24,
+    border: "1px solid #eee",
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
     flexWrap: "wrap",
-    gap: 10,
+    gap: 14,
   },
 
-  title: {
+  orderTitle: {
     fontSize: 24,
-    fontWeight: 700,
+    fontWeight: 800,
   },
 
-  select: {
+  subText: {
+    color: "#666",
+    marginTop: 4,
+    fontSize: 14,
+  },
+
+  memberSelect: {
     padding: 10,
     borderRadius: 10,
     border: "1px solid #ddd",
+    fontWeight: 600,
   },
+
+  /* GRID */
 
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))",
+    gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))",
     gap: 20,
   },
 
   card: {
     background: "#fff",
+    borderRadius: 16,
     padding: 14,
-    borderRadius: 14,
     border: "1px solid #eee",
     display: "flex",
     flexDirection: "column",
@@ -167,36 +196,43 @@ const styles = {
 
   image: {
     width: "100%",
-    borderRadius: 10,
-    marginBottom: 10,
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+
+  btnGroup: {
+    display: "flex",
+    gap: 8,
+    flexWrap: "wrap",
   },
 
   download: {
+    flex: 1,
+    textAlign: "center",
     background: "#000",
     color: "#fff",
-    textAlign: "center",
-    padding: 8,
-    borderRadius: 8,
+    padding: 10,
+    borderRadius: 10,
     textDecoration: "none",
-    fontWeight: 600,
-    marginBottom: 8,
+    fontWeight: 700,
   },
 
   startBtn: {
-    padding: 8,
-    borderRadius: 8,
-    border: "1px solid #000",
+    flex: 1,
     background: "#fff",
-    marginBottom: 6,
+    border: "1px solid #000",
+    borderRadius: 10,
+    padding: 10,
     fontWeight: 600,
   },
 
   completeBtn: {
-    padding: 8,
-    borderRadius: 8,
+    flex: 1,
     background: "#22c55e",
     color: "#fff",
+    borderRadius: 10,
     border: "none",
+    padding: 10,
     fontWeight: 700,
   },
 };
