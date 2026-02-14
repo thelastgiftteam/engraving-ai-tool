@@ -1,44 +1,53 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function OrderPage({ params }) {
   const { uid } = params;
 
-  // mock images for UI preview
-  const [images] = useState([
-    "https://via.placeholder.com/400",
-    "https://via.placeholder.com/400/000000",
-  ]);
+  const [order, setOrder] = useState(null);
 
-  const [engraver, setEngraver] = useState("");
+  useEffect(() => {
+    async function loadOrder() {
+      const res = await fetch("/api/orders");
+      const data = await res.json();
+
+      const found = (Array.isArray(data) ? data : data.orders || []).find(
+        (o) => o.uid === uid
+      );
+
+      setOrder(found || null);
+    }
+
+    loadOrder();
+  }, [uid]);
+
+  if (!order) {
+    return <div style={{ padding: 40 }}>Loading order...</div>;
+  }
 
   return (
     <main style={styles.wrapper}>
-      <h2 style={styles.title}>Order #{uid}</h2>
+      <h2 style={styles.title}>Order #{order.orderNumber}</h2>
 
       <div style={styles.grid}>
-        {images.map((img, i) => (
+        {order.images.map((link, i) => (
           <div key={i} style={styles.card}>
-            <img src={img} style={styles.image} />
+            {/* Preview Image */}
+            <img
+              src={convertDriveLink(link)}
+              style={styles.image}
+            />
 
-            <button style={styles.download}>Download Image</button>
-
-            <select
-              style={styles.select}
-              value={engraver}
-              onChange={(e) => setEngraver(e.target.value)}
-            >
-              <option value="">Select Engraver</option>
-              <option>Sreerag</option>
-              <option>Arjun</option>
-              <option>Nikhil</option>
-            </select>
-
-            <div style={styles.actions}>
-              <button style={styles.start}>Start Engraving</button>
-              <button style={styles.finish}>Finish Engraving</button>
+            {/* Original Link */}
+            <div style={styles.linkBox}>
+              {link}
             </div>
+
+            {/* Download Button */}
+            <a href={link} target="_blank" style={styles.download}>
+              Download Image
+            </a>
           </div>
         ))}
       </div>
@@ -46,11 +55,21 @@ export default function OrderPage({ params }) {
   );
 }
 
+/* Convert Google Drive link to preview image */
+function convertDriveLink(url) {
+  try {
+    const id = url.split("/d/")[1].split("/")[0];
+    return `https://drive.google.com/uc?export=view&id=${id}`;
+  } catch {
+    return url;
+  }
+}
+
 const styles = {
   wrapper: {
-    padding: 20,
     maxWidth: 1100,
-    margin: "0 auto",
+    margin: "40px auto",
+    padding: 20,
   },
 
   title: {
@@ -59,15 +78,15 @@ const styles = {
 
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))",
+    gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))",
     gap: 20,
   },
 
   card: {
     background: "#fff",
-    borderRadius: 12,
     padding: 14,
-    boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+    borderRadius: 12,
+    border: "1px solid #eee",
   },
 
   image: {
@@ -75,42 +94,22 @@ const styles = {
     borderRadius: 10,
   },
 
+  linkBox: {
+    marginTop: 10,
+    fontSize: 12,
+    color: "#666",
+    wordBreak: "break-all",
+  },
+
   download: {
     marginTop: 10,
-    width: "100%",
+    display: "block",
     padding: 10,
     background: "#000",
     color: "#fff",
+    textAlign: "center",
     borderRadius: 8,
-  },
-
-  select: {
-    marginTop: 10,
-    width: "100%",
-    padding: 10,
-    borderRadius: 8,
-    border: "1px solid #ddd",
-  },
-
-  actions: {
-    display: "flex",
-    gap: 8,
-    marginTop: 10,
-  },
-
-  start: {
-    flex: 1,
-    padding: 10,
-    background: "#2ecc71",
-    color: "#fff",
-    borderRadius: 8,
-  },
-
-  finish: {
-    flex: 1,
-    padding: 10,
-    background: "#e74c3c",
-    color: "#fff",
-    borderRadius: 8,
+    textDecoration: "none",
+    fontWeight: 600,
   },
 };
