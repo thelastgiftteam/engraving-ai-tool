@@ -19,26 +19,27 @@ export default function UploadPage() {
 
 async function submit() {
   if (!orderId) {
-    alert("Enter order number");
+    alert("Enter Order Number");
     return;
   }
 
+  const uid = Date.now().toString(); // unique ID
+
   await fetch("/api/orders", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
+      uid,
       orderNumber: orderId,
-      images: links.filter((l) => l),
+      images: links,
+      status: "pending",
+      engraver: null,
     }),
   });
 
-  alert("Order Created ✅");
-
-  setOrderId("");
-  setLinks([""]);
+  alert("Order Created!");
 }
+
 
 
   return (
