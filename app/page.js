@@ -1,180 +1,138 @@
-export default function HomePage() {
+"use client";
+
+import { useEffect, useState } from "react";
+import Link from "next/link";
+
+export default function Dashboard() {
+  const [orders, setOrders] = useState([]);
+
+  useEffect(() => {
+    fetch("/api/orders")
+      .then((r) => r.json())
+      .then((data) => setOrders(data.orders || []));
+  }, []);
+
   return (
-    <>
-      <style>{`
-        * {
-          box-sizing: border-box;
-        }
+    <main style={styles.wrapper}>
+      <h1 style={styles.title}>WHAT THE FRAME</h1>
+      <p style={styles.subtitle}>Engraving Team Dashboard</p>
 
-        input, select, textarea, button {
-          width: 100%;
-          max-width: 100%;
-        }
+      <div style={styles.topBar}>
+        <Link href="/upload" style={styles.uploadBtn}>
+          + New Design Upload
+        </Link>
+      </div>
 
-        @media (max-width: 600px) {
-          .title {
-            font-size: 24px;
-          }
-        }
-      `}</style>
+      <div style={styles.grid}>
+        {orders.map((o) => (
+          <Link key={o.uid} href={`/order/${o.uid}`} style={styles.card}>
+            <div style={styles.header}>
+              <strong>Order #{o.orderNumber}</strong>
+            </div>
 
-      <main style={styles.wrapper}>
-        {/* Brand */}
-        <header style={styles.header}>
-          <h1 className="title" style={styles.title}>WHAT THE FRAME</h1>
-          <p style={styles.subtitle}>
-            Engraving Mockup Generator · Internal Sales Tool
-          </p>
-        </header>
+            <div style={styles.meta}>
+              Images: {o.images?.length || 0}
+            </div>
 
-        {/* Form Card */}
-        <section style={styles.card}>
-          <h2 style={styles.cardTitle}>Create Mockup</h2>
+            <div style={styles.statusRow}>
+              <span
+                style={{
+                  ...styles.dot,
+                  background:
+                    o.status === "completed" ? "#22c55e" : "#f59e0b",
+                }}
+              />
+              <span>{o.status}</span>
+            </div>
 
-          {/* Customer Name */}
-          <label style={styles.label}>Customer Name</label>
-          <input
-            type="text"
-            placeholder="Enter customer name"
-            style={styles.input}
-          />
-
-          {/* Phone Number */}
-          <label style={styles.label}>Customer Phone Number</label>
-          <input
-            type="tel"
-            placeholder="Enter phone number"
-            style={styles.input}
-          />
-
-          {/* Optional Frame Text */}
-          <label style={styles.label}>
-            Text on Frame <span style={styles.optional}>(optional)</span>
-          </label>
-          <textarea
-            placeholder="Eg: Forever in our hearts"
-            style={styles.textarea}
-          />
-
-          {/* Upload Image */}
-          <label style={styles.label}>Upload Customer Image</label>
-          <input
-            type="file"
-            accept="image/*"
-            style={styles.input}
-          />
-
-          {/* Design Type */}
-          <label style={styles.label}>Select Design Style</label>
-          <select style={styles.input}>
-            <option value="">Select style</option>
-            <option>Ghibli Style</option>
-            <option>Pencil Sketch</option>
-            <option>Premium Engraving</option>
-            <option>Minimal Line Art</option>
-          </select>
-
-          {/* Generate Button */}
-          <button style={styles.button}>
-            Generate Mockup
-          </button>
-        </section>
-
-        <p style={styles.note}>
-          Mockups will be generated and saved for follow-up.
-        </p>
-      </main>
-    </>
+            {o.engraver && (
+              <div style={styles.engraver}>
+                Engraving by {o.engraver}
+              </div>
+            )}
+          </Link>
+        ))}
+      </div>
+    </main>
   );
 }
 
-/* ---------- STYLES ---------- */
-
 const styles = {
   wrapper: {
-    minHeight: "100vh",
-    background: "#f5f6fa",
-    padding: "20px",
-    fontFamily: "system-ui, sans-serif",
-  },
-
-  header: {
-    textAlign: "center",
-    marginBottom: 30,
+    maxWidth: 1100,
+    margin: "40px auto",
+    padding: 20,
   },
 
   title: {
-    fontSize: 28,
+    textAlign: "center",
+    fontSize: 32,
     fontWeight: 800,
-    marginBottom: 6,
   },
 
   subtitle: {
-    fontSize: 14,
-    color: "#555",
+    textAlign: "center",
+    marginBottom: 30,
+    color: "#666",
   },
 
-  card: {
-    maxWidth: 420,
-    margin: "0 auto",
-    background: "#ffffff",
-    padding: 20,
-    borderRadius: 12,
-    boxShadow: "0 8px 20px rgba(0,0,0,0.08)",
+  topBar: {
+    display: "flex",
+    justifyContent: "flex-end",
+    marginBottom: 20,
   },
 
-  cardTitle: {
-    fontSize: 20,
-    fontWeight: 700,
-    marginBottom: 16,
-  },
-
-  label: {
-    display: "block",
-    marginTop: 14,
-    marginBottom: 6,
-    fontSize: 14,
+  uploadBtn: {
+    padding: "10px 16px",
+    background: "#000",
+    color: "#fff",
+    borderRadius: 10,
+    textDecoration: "none",
     fontWeight: 600,
   },
 
-  optional: {
-    fontWeight: 400,
-    color: "#777",
-    fontSize: 12,
+  grid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))",
+    gap: 16,
   },
 
-  input: {
-    padding: 12,
-    borderRadius: 8,
-    border: "1px solid #ccc",
+  card: {
+    padding: 16,
+    borderRadius: 14,
+    background: "#fff",
+    textDecoration: "none",
+    color: "#000",
+    border: "1px solid #eee",
+  },
+
+  header: {
+    fontSize: 18,
+    marginBottom: 6,
+  },
+
+  meta: {
     fontSize: 14,
-  },
-
-  textarea: {
-    padding: 12,
-    borderRadius: 8,
-    border: "1px solid #ccc",
-    fontSize: 14,
-    minHeight: 70,
-    resize: "vertical",
-  },
-
-  button: {
-    marginTop: 22,
-    padding: 14,
-    borderRadius: 10,
-    border: "none",
-    background: "#000",
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: 700,
-    cursor: "pointer",
-  },
-
-  note: {
-    textAlign: "center",
-    marginTop: 18,
-    fontSize: 13,
     color: "#666",
+  },
+
+  statusRow: {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 10,
+    fontWeight: 600,
+  },
+
+  dot: {
+    width: 10,
+    height: 10,
+    borderRadius: 10,
+  },
+
+  engraver: {
+    marginTop: 10,
+    fontSize: 13,
+    color: "#444",
   },
 };
