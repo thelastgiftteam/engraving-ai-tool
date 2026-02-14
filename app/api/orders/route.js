@@ -1,15 +1,33 @@
-export async function GET(request, context) {
-  const uid = context.params.uid;
-
-  // Temporary in-memory storage
+export async function GET() {
   const orders = global.orders || [];
 
-  const order = orders.find(
-    (o) => String(o.uid) === String(uid)
+  return new Response(
+    JSON.stringify({ orders }),
+    {
+      headers: { "Content-Type": "application/json" },
+    }
   );
+}
+
+export async function POST(req) {
+  const body = await req.json();
+
+  if (!global.orders) {
+    global.orders = [];
+  }
+
+  const newOrder = {
+    uid: Date.now().toString(),
+    orderNumber: body.orderNumber,
+    images: body.images || [],
+    status: "pending",
+    engraver: null,
+  };
+
+  global.orders.unshift(newOrder);
 
   return new Response(
-    JSON.stringify({ order }),
+    JSON.stringify({ success: true, order: newOrder }),
     {
       headers: { "Content-Type": "application/json" },
     }
