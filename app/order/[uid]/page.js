@@ -308,7 +308,7 @@ export default function OrderPage({ params }) {
                   </div>
 
                   <div style={styles.imageActions}>
-                    
+                    <a
                       href={img.url}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -316,7 +316,7 @@ export default function OrderPage({ params }) {
                     >
                       👁️ View
                     </a>
-                    
+                    <a
                       href={img.url}
                       download
                       target="_blank"
