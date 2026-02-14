@@ -17,43 +17,29 @@ export default function UploadPage() {
     setLinks(copy);
   }
 
-  async function submit() {
-    if (!orderId) {
-      alert("Enter Order Number");
-      return;
-    }
-
-    const cleanLinks = links.filter((l) => l.trim() !== "");
-
-    if (cleanLinks.length === 0) {
-      alert("Add at least one image link");
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      await fetch("/api/orders", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          orderNumber: orderId,
-          images: cleanLinks,
-        }),
-      });
-
-      alert("Order Created Successfully ✅");
-
-      setOrderId("");
-      setLinks([""]);
-    } catch (err) {
-      alert("Failed creating order");
-    }
-
-    setLoading(false);
+async function submit() {
+  if (!orderId) {
+    alert("Enter order number");
+    return;
   }
+
+  await fetch("/api/orders", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      orderNumber: orderId,
+      images: links.filter((l) => l),
+    }),
+  });
+
+  alert("Order Created ✅");
+
+  setOrderId("");
+  setLinks([""]);
+}
+
 
   return (
     <main style={styles.wrapper}>
