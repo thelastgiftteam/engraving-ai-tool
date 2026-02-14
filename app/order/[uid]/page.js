@@ -1,29 +1,27 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 
-export default function OrderPage({ params }) {
-  const { uid } = params;
+export default function OrderPage() {
+  const params = useParams();
+  const orderId = params.uid;
 
   const [order, setOrder] = useState(null);
 
   useEffect(() => {
-    if (!uid) return;
+    if (!orderId) return;
 
-    fetch("/api/orders")
+    fetch(`/api/orders/${orderId}`)
       .then((r) => r.json())
       .then((data) => {
-        const found = (data.orders || []).find(
-          (o) => String(o.uid) === String(uid)
-        );
-
-        setOrder(found || null);
+        setOrder(data.order);
       });
-  }, [uid]);
+  }, [orderId]);
 
   if (!order) {
     return (
-      <main style={{ padding: 40 }}>
+      <main style={{ padding: 20 }}>
         <h2>Loading order...</h2>
       </main>
     );
@@ -31,27 +29,32 @@ export default function OrderPage({ params }) {
 
   return (
     <main style={styles.wrapper}>
-      <h1 style={styles.title}>Order #{order.orderNumber}</h1>
+      <h2 style={styles.title}>Order #{order.orderNumber}</h2>
 
       <div style={styles.section}>
-        <h3>Design Images</h3>
+        <strong>Status:</strong> {order.status}
+      </div>
 
+      {order.engraver && (
+        <div style={styles.section}>
+          Engraving by: {order.engraver}
+        </div>
+      )}
+
+      <h3 style={{ marginTop: 20 }}>Design Images</h3>
+
+      <div style={styles.grid}>
         {order.images?.map((img, i) => (
-          <div key={i} style={styles.imageCard}>
+          <div key={i} style={styles.card}>
             <a href={img} target="_blank">
-              Open Drive Link
+              <img src={img} style={styles.image} />
             </a>
 
-            <a href={img} download style={styles.downloadBtn}>
-              Download
+            <a href={img} target="_blank" style={styles.download}>
+              Download Image
             </a>
           </div>
         ))}
-      </div>
-
-      <div style={styles.section}>
-        <h3>Status</h3>
-        <p>{order.status}</p>
       </div>
     </main>
   );
@@ -59,34 +62,48 @@ export default function OrderPage({ params }) {
 
 const styles = {
   wrapper: {
-    maxWidth: 900,
+    maxWidth: 1000,
     margin: "40px auto",
     padding: 20,
   },
 
   title: {
-    fontSize: 28,
+    fontSize: 26,
     marginBottom: 20,
   },
 
   section: {
-    marginTop: 20,
+    marginTop: 10,
   },
 
-  imageCard: {
-    display: "flex",
-    gap: 12,
-    marginTop: 10,
+  grid: {
+    marginTop: 20,
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill,minmax(220px,1fr))",
+    gap: 16,
+  },
+
+  card: {
+    background: "#fff",
+    borderRadius: 12,
     padding: 12,
     border: "1px solid #eee",
+  },
+
+  image: {
+    width: "100%",
     borderRadius: 10,
   },
 
-  downloadBtn: {
+  download: {
+    display: "block",
+    marginTop: 10,
     background: "#000",
     color: "#fff",
-    padding: "6px 10px",
-    borderRadius: 6,
+    textAlign: "center",
+    padding: "8px",
+    borderRadius: 8,
     textDecoration: "none",
+    fontWeight: 600,
   },
 };
