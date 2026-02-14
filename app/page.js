@@ -3,87 +3,75 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 
-/* ---------- TOP NAV ---------- */
-
-function TopNav() {
-  return (
-    <div style={styles.nav}>
-      <div style={styles.brand}>WHAT THE FRAME</div>
-
-      <div style={styles.navRight}>
-        <Link href="/upload" style={styles.navBtn}>
-          Upload Order
-        </Link>
-      </div>
-    </div>
-  );
-}
-
-/* ---------- DASHBOARD ---------- */
-
 export default function Dashboard() {
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
-    fetch("/api/orders")
-      .then((r) => r.json())
-      .then((data) => setOrders(data.orders || []));
+    async function load() {
+      const res = await fetch("/api/orders");
+      const data = await res.json();
+      setOrders(data.orders || []);
+    }
+
+    load();
   }, []);
 
-  function getStatus(o) {
-    if (!o.images || o.images.length === 0) return "pending";
+  function getStatus(order) {
+    if (order.status === "completed") {
+      return { text: "Completed", color: "#22c55e" };
+    }
 
-    const processing = o.images.some(
-      (img) =>
-        typeof img === "object" &&
-        img.status === "processing"
-    );
+    if (order.status === "processing") {
+      return {
+        text: `Processing by ${order.teamMember || "Team"}`,
+        color: "#3b82f6",
+      };
+    }
 
-    const completed = o.images.every(
-      (img) =>
-        typeof img === "object" &&
-        img.status === "completed"
-    );
-
-    if (completed) return "completed";
-    if (processing) return "processing";
-    return "pending";
+    return { text: "Pending", color: "#f59e0b" };
   }
 
   return (
-    <main style={styles.page}>
-      <TopNav />
+    <main style={styles.wrapper}>
+      {/* TOP NAV */}
+      <div style={styles.nav}>
+        <strong>WHAT THE FRAME</strong>
 
-      <h2 style={styles.title}>Engraving Dashboard</h2>
+        <div style={styles.navRight}>
+          <Link href="/" style={styles.navBtn}>
+            Dashboard
+          </Link>
+
+          <Link href="/upload" style={styles.navBtn}>
+            Upload
+          </Link>
+        </div>
+      </div>
+
+      <h1 style={styles.title}>Engraving Team Dashboard</h1>
 
       <div style={styles.grid}>
         {orders.map((o) => {
           const status = getStatus(o);
 
           return (
-            <Link
-              key={o.uid}
-              href={`/order/${o.uid}`}
-              style={styles.card}
-            >
-              <div style={styles.cardHeader}>
+            <Link key={o.uid} href={`/order/${o.uid}`} style={styles.card}>
+              <div style={styles.header}>
                 <strong>Order #{o.orderNumber}</strong>
               </div>
 
               <div style={styles.meta}>
-                Frames: {o.images?.length || 0}
+                Images: {o.images?.length || 0}
               </div>
 
               <div style={styles.statusRow}>
-                <span style={styles.dot(status)} />
-
-                <span>
-                  {status === "processing"
-                    ? `Processing by ${o.teamMember || "Team"}`
-                    : status === "completed"
-                    ? "Completed"
-                    : "Pending"}
-                </span>
+                <span
+                  style={{
+                    ...styles.dot,
+                    background: status.color,
+                  }}
+                />
+                <span>{status.text}</span>
               </div>
             </Link>
           );
@@ -93,27 +81,19 @@ export default function Dashboard() {
   );
 }
 
-/* ---------- STYLES ---------- */
-
 const styles = {
-  page: {
+  wrapper: {
     maxWidth: 1100,
-    margin: "0 auto",
+    margin: "30px auto",
     padding: 20,
   },
 
   nav: {
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "center",
     marginBottom: 30,
     flexWrap: "wrap",
     gap: 10,
-  },
-
-  brand: {
-    fontWeight: 800,
-    fontSize: 18,
   },
 
   navRight: {
@@ -122,63 +102,55 @@ const styles = {
   },
 
   navBtn: {
+    padding: "8px 14px",
     background: "#000",
     color: "#fff",
-    padding: "8px 14px",
-    borderRadius: 10,
+    borderRadius: 8,
     textDecoration: "none",
-    fontWeight: 600,
   },
 
   title: {
-    fontSize: 22,
-    marginBottom: 20,
-    fontWeight: 700,
+    textAlign: "center",
+    marginBottom: 30,
   },
 
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit,minmax(260px,1fr))",
-    gap: 18,
+    gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))",
+    gap: 16,
   },
 
   card: {
+    padding: 16,
+    borderRadius: 14,
     background: "#fff",
-    borderRadius: 16,
-    padding: 18,
-    border: "1px solid #eee",
     textDecoration: "none",
     color: "#000",
-    display: "flex",
-    flexDirection: "column",
-    gap: 10,
+    border: "1px solid #eee",
+    transition: "0.2s",
   },
 
-  cardHeader: {
+  header: {
     fontSize: 18,
+    marginBottom: 6,
   },
 
   meta: {
-    color: "#666",
     fontSize: 14,
+    color: "#666",
   },
 
   statusRow: {
     display: "flex",
     alignItems: "center",
     gap: 8,
+    marginTop: 10,
     fontWeight: 600,
   },
 
-  dot: (status) => ({
+  dot: {
     width: 10,
     height: 10,
     borderRadius: 10,
-    background:
-      status === "completed"
-        ? "#22c55e"
-        : status === "processing"
-        ? "#3b82f6"
-        : "#f59e0b",
-  }),
+  },
 };
