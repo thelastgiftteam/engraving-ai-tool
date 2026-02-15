@@ -66,7 +66,6 @@ export default function UploadPage() {
   async function submit() {
     setError("");
 
-    // Validation
     if (!orderId.trim()) {
       setError("Please enter an order number");
       return;
@@ -83,7 +82,6 @@ export default function UploadPage() {
       return;
     }
 
-    // Check if all images have product types
     const missingProductType = validImages.some(img => !img.productTypeId);
     if (missingProductType) {
       setError("Please select product type for all images");
@@ -128,7 +126,6 @@ export default function UploadPage() {
             <span style={styles.brandText}>What The Frame</span>
           </div>
 
-          {/* Mobile Menu Button */}
           <button 
             onClick={() => setMenuOpen(!menuOpen)} 
             style={styles.menuBtn}
@@ -138,17 +135,14 @@ export default function UploadPage() {
           </button>
         </div>
 
-        {/* Desktop Navigation */}
         <div style={styles.navDesktop}>
           <Link href="/" style={styles.navBtn}>Dashboard</Link>
           <Link href="/upload" style={{...styles.navBtn, ...styles.navBtnActive}}>+ New Order</Link>
           <Link href="/analytics" style={styles.navBtn}>📊 Analytics</Link>
           <Link href="/recent" style={styles.navBtn}>📋 Recent</Link>
           <Link href="/settings" style={styles.navBtn}>⚙️ Settings</Link>
-          <Link href="/backup" style={styles.navBtn}>🔄 Backup</Link>
         </div>
 
-        {/* Mobile Dropdown Menu */}
         {menuOpen && (
           <div style={styles.mobileMenu}>
             <Link href="/" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
@@ -165,9 +159,6 @@ export default function UploadPage() {
             </Link>
             <Link href="/settings" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
               <span style={styles.mobileMenuIcon}>⚙️</span> Settings
-            </Link>
-            <Link href="/backup" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
-              <span style={styles.mobileMenuIcon}>🔄</span> Backup
             </Link>
           </div>
         )}
@@ -197,7 +188,7 @@ export default function UploadPage() {
             </label>
             <input
               type="text"
-              placeholder="e.g., #1234 or WTF-1234"
+              placeholder="e.g., #1234"
               value={orderId}
               onChange={(e) => {
                 setOrderId(e.target.value);
@@ -270,7 +261,7 @@ export default function UploadPage() {
                       <label style={styles.smallLabel}>Google Drive Link</label>
                       <input
                         type="url"
-                        placeholder="Paste link here"
+                        placeholder="Paste link"
                         value={image.url}
                         onChange={(e) => updateImage(i, "url", e.target.value)}
                         style={styles.inputSmall}
@@ -286,7 +277,7 @@ export default function UploadPage() {
                         style={styles.selectSmall}
                         disabled={loading}
                       >
-                        <option value="">Select product...</option>
+                        <option value="">Select...</option>
                         {productTypes.map(pt => (
                           <option key={pt.id} value={pt.id}>
                             {pt.name}
@@ -300,7 +291,7 @@ export default function UploadPage() {
             </div>
 
             <div style={styles.tipBox}>
-              💡 <strong>Tip:</strong> Right-click image in Drive → Get link → Copy & paste
+              💡 Right-click image → Get link → Copy & paste
             </div>
           </div>
 
@@ -326,13 +317,12 @@ export default function UploadPage() {
 
           {/* Info Box */}
           <div style={styles.infoBox}>
-            <div style={styles.infoTitle}>📋 What happens next?</div>
-            <ol style={styles.infoList}>
-              <li>Order appears as "Pending"</li>
-              <li>Team claims and processes</li>
+            <div style={styles.infoTitle}>📋 What's next?</div>
+            <ul style={styles.infoList}>
+              <li>Order appears as Pending</li>
+              <li>Team claims & processes</li>
               <li>Time tracked automatically</li>
-              <li>Data exports to Sheets</li>
-            </ol>
+            </ul>
           </div>
         </div>
       </div>
@@ -455,17 +445,18 @@ const styles = {
   formCard: {
     background: "#fff",
     borderRadius: "20px",
-    padding: "24px",
+    padding: "20px",
     boxShadow: "0 10px 40px rgba(0,0,0,0.15)",
+    overflow: "hidden",
   },
 
   header: {
-    marginBottom: "24px",
+    marginBottom: "20px",
     textAlign: "center",
   },
 
   title: {
-    fontSize: "24px",
+    fontSize: "22px",
     fontWeight: "800",
     color: "#1f2937",
     marginBottom: "6px",
@@ -473,10 +464,11 @@ const styles = {
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
     backgroundClip: "text",
+    wordBreak: "break-word",
   },
 
   subtitle: {
-    fontSize: "14px",
+    fontSize: "13px",
     color: "#6b7280",
     lineHeight: "1.5",
   },
@@ -484,44 +476,47 @@ const styles = {
   errorBox: {
     background: "#fef2f2",
     border: "2px solid #fca5a5",
-    borderRadius: "12px",
+    borderRadius: "10px",
     padding: "12px",
-    marginBottom: "20px",
+    marginBottom: "16px",
     color: "#991b1b",
-    fontSize: "13px",
+    fontSize: "12px",
     fontWeight: "600",
     display: "flex",
     alignItems: "flex-start",
-    gap: "10px",
+    gap: "8px",
+    wordBreak: "break-word",
   },
 
   errorIcon: {
-    fontSize: "18px",
+    fontSize: "16px",
     flexShrink: 0,
+    marginTop: "2px",
   },
 
   errorText: {
     flex: 1,
+    wordBreak: "break-word",
   },
 
   formGroup: {
-    marginBottom: "20px",
+    marginBottom: "18px",
   },
 
   label: {
     display: "block",
-    fontSize: "14px",
+    fontSize: "13px",
     fontWeight: "700",
     color: "#374151",
-    marginBottom: "8px",
+    marginBottom: "6px",
   },
 
   smallLabel: {
     display: "block",
-    fontSize: "12px",
+    fontSize: "11px",
     fontWeight: "600",
     color: "#6b7280",
-    marginBottom: "6px",
+    marginBottom: "5px",
   },
 
   required: {
@@ -532,34 +527,37 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "12px",
+    marginBottom: "10px",
+    gap: "8px",
   },
 
   input: {
     width: "100%",
-    padding: "12px 14px",
+    padding: "10px 12px",
     fontSize: "14px",
     border: "2px solid #e5e7eb",
     borderRadius: "10px",
     transition: "all 0.2s",
     fontFamily: "inherit",
     backgroundColor: "#fff",
+    boxSizing: "border-box",
   },
 
   inputSmall: {
     width: "100%",
-    padding: "10px 12px",
+    padding: "8px 10px",
     fontSize: "13px",
     border: "2px solid #e5e7eb",
     borderRadius: "8px",
     transition: "all 0.2s",
     fontFamily: "inherit",
     backgroundColor: "#fff",
+    boxSizing: "border-box",
   },
 
   select: {
     width: "100%",
-    padding: "12px 14px",
+    padding: "10px 12px",
     fontSize: "14px",
     border: "2px solid #e5e7eb",
     borderRadius: "10px",
@@ -568,11 +566,12 @@ const styles = {
     backgroundColor: "#fff",
     fontWeight: "600",
     cursor: "pointer",
+    boxSizing: "border-box",
   },
 
   selectSmall: {
     width: "100%",
-    padding: "10px 12px",
+    padding: "8px 10px",
     fontSize: "13px",
     border: "2px solid #e5e7eb",
     borderRadius: "8px",
@@ -581,18 +580,19 @@ const styles = {
     backgroundColor: "#fff",
     fontWeight: "600",
     cursor: "pointer",
+    boxSizing: "border-box",
   },
 
   imagesList: {
     display: "flex",
     flexDirection: "column",
-    gap: "12px",
+    gap: "10px",
   },
 
   imageCard: {
-    padding: "14px",
+    padding: "12px",
     background: "#f9fafb",
-    borderRadius: "12px",
+    borderRadius: "10px",
     border: "2px solid #e5e7eb",
   },
 
@@ -600,11 +600,11 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "12px",
+    marginBottom: "10px",
   },
 
   imageNumber: {
-    fontSize: "13px",
+    fontSize: "12px",
     fontWeight: "700",
     color: "#374151",
   },
@@ -612,33 +612,34 @@ const styles = {
   imageFields: {
     display: "flex",
     flexDirection: "column",
-    gap: "10px",
+    gap: "8px",
   },
 
   fieldGroup: {
-    flex: 1,
+    width: "100%",
   },
 
   addBtn: {
-    padding: "6px 14px",
+    padding: "6px 12px",
     background: "#667eea",
     border: "none",
     borderRadius: "8px",
-    fontSize: "12px",
+    fontSize: "11px",
     fontWeight: "700",
     color: "#fff",
     cursor: "pointer",
     transition: "all 0.2s",
     whiteSpace: "nowrap",
+    flexShrink: 0,
   },
 
   removeBtn: {
-    width: "28px",
-    height: "28px",
+    width: "26px",
+    height: "26px",
     background: "#fee2e2",
     border: "2px solid #fecaca",
-    borderRadius: "7px",
-    fontSize: "18px",
+    borderRadius: "6px",
+    fontSize: "16px",
     fontWeight: "700",
     color: "#dc2626",
     cursor: "pointer",
@@ -650,24 +651,25 @@ const styles = {
   },
 
   helpText: {
-    fontSize: "12px",
+    fontSize: "11px",
     color: "#6b7280",
-    marginTop: "8px",
-    padding: "10px",
+    marginTop: "6px",
+    padding: "8px",
     background: "#f0f9ff",
     borderRadius: "8px",
     border: "1px solid #bfdbfe",
+    lineHeight: "1.4",
   },
 
   tipBox: {
-    fontSize: "12px",
+    fontSize: "11px",
     color: "#6b7280",
-    marginTop: "10px",
-    padding: "10px",
+    marginTop: "8px",
+    padding: "8px",
     background: "#f0f9ff",
     borderRadius: "8px",
     border: "1px solid #bfdbfe",
-    lineHeight: "1.5",
+    lineHeight: "1.4",
   },
 
   link: {
@@ -678,7 +680,7 @@ const styles = {
 
   submitBtn: {
     width: "100%",
-    padding: "14px 20px",
+    padding: "12px 18px",
     background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
     color: "#fff",
     border: "none",
@@ -700,8 +702,8 @@ const styles = {
   },
 
   spinner: {
-    width: "16px",
-    height: "16px",
+    width: "14px",
+    height: "14px",
     border: "2px solid rgba(255,255,255,0.3)",
     borderTop: "2px solid #fff",
     borderRadius: "50%",
@@ -709,51 +711,24 @@ const styles = {
   },
 
   infoBox: {
-    marginTop: "24px",
-    padding: "16px",
+    marginTop: "20px",
+    padding: "14px",
     background: "#f0fdf4",
     border: "2px solid #86efac",
-    borderRadius: "12px",
-    fontSize: "13px",
+    borderRadius: "10px",
+    fontSize: "12px",
     color: "#166534",
   },
 
   infoTitle: {
     fontWeight: "700",
-    marginBottom: "8px",
+    marginBottom: "6px",
   },
 
   infoList: {
-    paddingLeft: "18px",
+    paddingLeft: "16px",
     margin: "0",
-    lineHeight: "1.7",
-  },
-
-  "@media (min-width: 769px)": {
-    container: {
-      maxWidth: "800px",
-      margin: "40px auto 0",
-      padding: "0 24px",
-    },
-    formCard: {
-      padding: "40px",
-      borderRadius: "24px",
-    },
-    title: {
-      fontSize: "32px",
-    },
-    subtitle: {
-      fontSize: "16px",
-    },
-  },
-
-  "@media (max-width: 768px)": {
-    menuBtn: {
-      display: "block",
-    },
-    navDesktop: {
-      display: "none",
-    },
+    lineHeight: "1.6",
   },
 };
 
@@ -771,29 +746,25 @@ if (typeof document !== "undefined") {
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
 
-    @media (hover: hover) {
-      .addBtn:hover {
-        background: #5568d3;
-        transform: translateY(-1px);
+    @media (max-width: 768px) {
+      .menuBtn {
+        display: block;
       }
-
-      .removeBtn:hover {
-        background: #fecaca;
-        transform: scale(1.05);
-      }
-
-      .submitBtn:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5);
-      }
-
-      .mobileMenuItem:hover {
-        background: #f9fafb;
+      .navDesktop {
+        display: none;
       }
     }
 
-    .submitBtn:active:not(:disabled) {
-      transform: translateY(0);
+    @media (min-width: 769px) {
+      .menuBtn {
+        display: none;
+      }
+    }
+
+    @media (hover: hover) {
+      button:hover:not(:disabled) {
+        transform: translateY(-1px);
+      }
     }
   `;
   document.head.appendChild(style);
