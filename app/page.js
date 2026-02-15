@@ -6,7 +6,8 @@ import Link from "next/link";
 export default function Dashboard() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState("all"); // all, pending, processing, completed
+  const [refreshing, setRefreshing] = useState(false);
+  const [filter, setFilter] = useState("all");
 
   useEffect(() => {
     loadOrders();
@@ -22,6 +23,15 @@ export default function Dashboard() {
       console.error("Failed to load orders:", error);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleRefresh() {
+    try {
+      setRefreshing(true);
+      await loadOrders();
+    } finally {
+      setRefreshing(false);
     }
   }
 
@@ -80,6 +90,18 @@ export default function Dashboard() {
 
           <Link href="/upload" style={styles.navBtn}>
             + New Order
+          </Link>
+
+          <Link href="/analytics" style={styles.navBtn}>
+            📊 Analytics
+          </Link>
+
+          <Link href="/recent" style={styles.navBtn}>
+            📋 Recent
+          </Link>
+
+          <Link href="/settings" style={styles.navBtn}>
+            ⚙️ Settings
           </Link>
         </div>
       </nav>
@@ -192,6 +214,11 @@ export default function Dashboard() {
                     <span style={styles.metaItem}>
                       📅 {formatDate(order.createdAt)}
                     </span>
+                    {order.designer && (
+                      <span style={styles.metaItem}>
+                        ✏️ {order.designer}
+                      </span>
+                    )}
                   </div>
 
                   {order.status === "processing" && order.teamMember && (
@@ -207,6 +234,32 @@ export default function Dashboard() {
           })}
         </div>
       )}
+
+      {/* Refresh Button - Fixed at bottom */}
+      <div style={styles.refreshContainer}>
+        <button 
+          onClick={handleRefresh} 
+          disabled={refreshing}
+          style={{
+            ...styles.refreshBtn,
+            ...(refreshing ? styles.refreshBtnLoading : {})
+          }}
+        >
+          {refreshing ? (
+            <>
+              <span style={styles.refreshSpinner}></span>
+              Refreshing...
+            </>
+          ) : (
+            <>
+              🔄 Refresh Dashboard
+            </>
+          )}
+        </button>
+        <p style={styles.refreshHint}>
+          💡 Click to manually refresh and see latest orders
+        </p>
+      </div>
     </main>
   );
 }
@@ -235,10 +288,9 @@ const styles = {
   wrapper: {
     minHeight: "100vh",
     background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-    padding: "0 0 40px 0",
+    padding: "0 0 120px 0",
   },
 
-  // Navigation
   nav: {
     background: "rgba(255, 255, 255, 0.95)",
     backdropFilter: "blur(10px)",
@@ -296,7 +348,6 @@ const styles = {
     boxShadow: "0 4px 15px rgba(102, 126, 234, 0.4)",
   },
 
-  // Stats Bar
   statsBar: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
@@ -330,7 +381,6 @@ const styles = {
     letterSpacing: "0.5px",
   },
 
-  // Filter Bar
   filterBar: {
     display: "flex",
     gap: "12px",
@@ -360,7 +410,6 @@ const styles = {
     boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
   },
 
-  // Grid
   grid: {
     display: "grid",
     gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
@@ -477,7 +526,6 @@ const styles = {
     transition: "all 0.3s",
   },
 
-  // Loading State
   loadingState: {
     maxWidth: "1200px",
     margin: "60px auto",
@@ -495,7 +543,6 @@ const styles = {
     margin: "0 auto 20px",
   },
 
-  // Empty State
   emptyState: {
     maxWidth: "400px",
     margin: "80px auto",
@@ -539,7 +586,54 @@ const styles = {
     transition: "all 0.2s",
   },
 
-  // Responsive
+  // Refresh Button - Fixed at bottom
+  refreshContainer: {
+    position: "fixed",
+    bottom: "24px",
+    left: "50%",
+    transform: "translateX(-50%)",
+    zIndex: 50,
+    textAlign: "center",
+  },
+
+  refreshBtn: {
+    padding: "16px 32px",
+    background: "rgba(255, 255, 255, 0.95)",
+    backdropFilter: "blur(10px)",
+    color: "#667eea",
+    border: "3px solid #667eea",
+    borderRadius: "50px",
+    fontSize: "16px",
+    fontWeight: "800",
+    cursor: "pointer",
+    boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
+    transition: "all 0.3s",
+    display: "flex",
+    alignItems: "center",
+    gap: "10px",
+  },
+
+  refreshBtnLoading: {
+    opacity: 0.7,
+    cursor: "not-allowed",
+  },
+
+  refreshSpinner: {
+    width: "18px",
+    height: "18px",
+    border: "3px solid rgba(102, 126, 234, 0.3)",
+    borderTop: "3px solid #667eea",
+    borderRadius: "50%",
+    animation: "spin 0.8s linear infinite",
+  },
+
+  refreshHint: {
+    marginTop: "8px",
+    fontSize: "12px",
+    color: "rgba(255,255,255,0.9)",
+    fontWeight: "600",
+  },
+
   "@media (max-width: 768px)": {
     nav: {
       flexDirection: "column",
@@ -564,7 +658,6 @@ const styles = {
   },
 };
 
-// Add keyframe animation for spinner
 if (typeof document !== "undefined") {
   const style = document.createElement("style");
   style.textContent = `
@@ -585,6 +678,11 @@ if (typeof document !== "undefined") {
     
     .card:hover .previewImg {
       transform: scale(1.05);
+    }
+
+    .refreshBtn:hover:not(:disabled) {
+      transform: scale(1.05);
+      box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4);
     }
   `;
   document.head.appendChild(style);
