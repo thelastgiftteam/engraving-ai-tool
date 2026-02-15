@@ -12,6 +12,7 @@ export default function OrderPage({ params }) {
   const [processing, setProcessing] = useState(false);
   const [teamMembers, setTeamMembers] = useState([]);
   const [engraverId, setEngraverId] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     loadOrder();
@@ -95,7 +96,7 @@ export default function OrderPage({ params }) {
 
   async function markComplete() {
     const confirmed = confirm(
-      "✅ Mark this order as completed?\n\nThis will finalize the order and it cannot be undone."
+      "✅ Mark as completed?\n\nThis cannot be undone."
     );
 
     if (!confirmed) return;
@@ -130,14 +131,16 @@ export default function OrderPage({ params }) {
     return (
       <main style={styles.wrapper}>
         <nav style={styles.nav}>
-          <div style={styles.navBrand}>
-            <span style={styles.logo}>🖼️</span>
-            <span style={styles.brandText}>What The Frame</span>
+          <div style={styles.navContent}>
+            <div style={styles.navBrand}>
+              <span style={styles.logo}>🖼️</span>
+              <span style={styles.brandText}>What The Frame</span>
+            </div>
           </div>
         </nav>
         <div style={styles.loadingState}>
           <div style={styles.spinner}></div>
-          <p style={styles.loadingText}>Loading order details...</p>
+          <p style={styles.loadingText}>Loading order...</p>
         </div>
       </main>
     );
@@ -147,15 +150,17 @@ export default function OrderPage({ params }) {
     return (
       <main style={styles.wrapper}>
         <nav style={styles.nav}>
-          <div style={styles.navBrand}>
-            <span style={styles.logo}>🖼️</span>
-            <span style={styles.brandText}>What The Frame</span>
+          <div style={styles.navContent}>
+            <div style={styles.navBrand}>
+              <span style={styles.logo}>🖼️</span>
+              <span style={styles.brandText}>What The Frame</span>
+            </div>
           </div>
         </nav>
         <div style={styles.errorState}>
           <div style={styles.errorIcon}>❌</div>
           <h2 style={styles.errorTitle}>Order Not Found</h2>
-          <p style={styles.errorText}>The order you're looking for doesn't exist.</p>
+          <p style={styles.errorText}>This order doesn't exist.</p>
           <Link href="/" style={styles.backBtn}>
             ← Back to Dashboard
           </Link>
@@ -170,22 +175,54 @@ export default function OrderPage({ params }) {
 
   return (
     <main style={styles.wrapper}>
-      {/* Top Navigation */}
+      {/* Compact Mobile Navigation */}
       <nav style={styles.nav}>
-        <div style={styles.navBrand}>
-          <span style={styles.logo}>🖼️</span>
-          <span style={styles.brandText}>What The Frame</span>
+        <div style={styles.navContent}>
+          <div style={styles.navBrand}>
+            <span style={styles.logo}>🖼️</span>
+            <span style={styles.brandText}>What The Frame</span>
+          </div>
+
+          <button 
+            onClick={() => setMenuOpen(!menuOpen)} 
+            style={styles.menuBtn}
+            aria-label="Toggle menu"
+          >
+            {menuOpen ? "✕" : "☰"}
+          </button>
         </div>
 
-        <div style={styles.navRight}>
-          <Link href="/" style={styles.navBtn}>
-            Dashboard
-          </Link>
-
-          <Link href="/upload" style={styles.navBtn}>
-            + New Order
-          </Link>
+        <div style={styles.navDesktop}>
+          <Link href="/" style={styles.navBtn}>Dashboard</Link>
+          <Link href="/upload" style={styles.navBtn}>+ New Order</Link>
+          <Link href="/analytics" style={styles.navBtn}>📊 Analytics</Link>
+          <Link href="/recent" style={styles.navBtn}>📋 Recent</Link>
+          <Link href="/settings" style={styles.navBtn}>⚙️ Settings</Link>
+          <Link href="/backup" style={styles.navBtn}>🔄 Backup</Link>
         </div>
+
+        {menuOpen && (
+          <div style={styles.mobileMenu}>
+            <Link href="/" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>🏠</span> Dashboard
+            </Link>
+            <Link href="/upload" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>➕</span> New Order
+            </Link>
+            <Link href="/analytics" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>📊</span> Analytics
+            </Link>
+            <Link href="/recent" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>📋</span> Recent Orders
+            </Link>
+            <Link href="/settings" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>⚙️</span> Settings
+            </Link>
+            <Link href="/backup" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>🔄</span> Backup
+            </Link>
+          </div>
+        )}
       </nav>
 
       {/* Order Content */}
@@ -193,31 +230,31 @@ export default function OrderPage({ params }) {
         {/* Header Section */}
         <div style={styles.headerCard}>
           <Link href="/" style={styles.backLink}>
-            ← Back to Dashboard
+            ← Back
           </Link>
 
           <div style={styles.orderHeader}>
             <div>
-              <h1 style={styles.orderTitle}>Order #{order.orderNumber}</h1>
+              <h1 style={styles.orderTitle}>#{order.orderNumber}</h1>
               <div style={styles.orderMeta}>
-                📅 Created {formatDate(order.createdAt)}
+                📅 {formatDate(order.createdAt)}
               </div>
             </div>
 
             <div style={getStatusStyle(order.status)}>
-              {getStatusIcon(order.status)} {getStatusText(order.status, order.teamMember)}
+              {getStatusIcon(order.status)} {getStatusText(order.status)}
             </div>
           </div>
         </div>
 
         {/* Action Card */}
         <div style={styles.actionCard}>
-          <h3 style={styles.actionTitle}>Order Processing</h3>
+          <h3 style={styles.actionTitle}>Processing</h3>
 
           {/* Team Member Selection */}
           <div style={styles.formGroup}>
             <label style={styles.label}>
-              Select Team Member {canStartProcessing && <span style={styles.required}>*</span>}
+              Team Member {canStartProcessing && <span style={styles.required}>*</span>}
             </label>
             <select
               value={selectedMember}
@@ -253,12 +290,10 @@ export default function OrderPage({ params }) {
                 {processing ? (
                   <>
                     <span style={styles.btnSpinner}></span>
-                    Claiming Order...
+                    Claiming...
                   </>
                 ) : (
-                  <>
-                    ⚡ Start Processing
-                  </>
+                  "⚡ Start Processing"
                 )}
               </button>
             )}
@@ -269,7 +304,7 @@ export default function OrderPage({ params }) {
                 <div>
                   <div style={styles.processingTitle}>Order Claimed</div>
                   <div style={styles.processingText}>
-                    {order.teamMember} is currently processing this order
+                    {order.teamMember} is processing
                   </div>
                 </div>
               </div>
@@ -290,9 +325,7 @@ export default function OrderPage({ params }) {
                     Completing...
                   </>
                 ) : (
-                  <>
-                    ✓ Mark as Completed
-                  </>
+                  "✓ Mark Complete"
                 )}
               </button>
             )}
@@ -301,9 +334,9 @@ export default function OrderPage({ params }) {
               <div style={styles.completedInfo}>
                 <span style={styles.completedIcon}>✅</span>
                 <div>
-                  <div style={styles.completedTitle}>Order Completed</div>
+                  <div style={styles.completedTitle}>Completed</div>
                   <div style={styles.completedText}>
-                    Finished on {formatDate(order.completedAt)}
+                    {formatDate(order.completedAt)}
                   </div>
                 </div>
               </div>
@@ -314,7 +347,7 @@ export default function OrderPage({ params }) {
         {/* Images Section */}
         <div style={styles.imagesCard}>
           <h3 style={styles.sectionTitle}>
-            Design Images ({order.images?.length || 0})
+            Images ({order.images?.length || 0})
           </h3>
 
           {order.images && order.images.length > 0 ? (
@@ -357,7 +390,7 @@ export default function OrderPage({ params }) {
           ) : (
             <div style={styles.noImages}>
               <span style={styles.noImagesIcon}>🖼️</span>
-              <p>No images attached to this order</p>
+              <p>No images</p>
             </div>
           )}
         </div>
@@ -373,21 +406,22 @@ function getStatusIcon(status) {
   return "⏳";
 }
 
-function getStatusText(status, teamMember) {
-  if (status === "completed") return "Completed";
-  if (status === "processing") return teamMember ? `Processing by ${teamMember}` : "Processing";
+function getStatusText(status) {
+  if (status === "completed") return "Done";
+  if (status === "processing") return "Processing";
   return "Pending";
 }
 
 function getStatusStyle(status) {
   const baseStyle = {
-    padding: "12px 20px",
-    borderRadius: "12px",
-    fontSize: "15px",
+    padding: "8px 14px",
+    borderRadius: "10px",
+    fontSize: "13px",
     fontWeight: "700",
     display: "inline-flex",
     alignItems: "center",
-    gap: "8px",
+    gap: "6px",
+    whiteSpace: "nowrap",
   };
 
   if (status === "completed") {
@@ -405,7 +439,6 @@ function formatDate(dateString) {
     return date.toLocaleDateString('en-US', { 
       month: 'short', 
       day: 'numeric',
-      year: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
     });
@@ -421,32 +454,34 @@ const styles = {
     paddingBottom: "40px",
   },
 
-  // Navigation
   nav: {
-    background: "rgba(255, 255, 255, 0.95)",
+    background: "rgba(255, 255, 255, 0.98)",
     backdropFilter: "blur(10px)",
-    padding: "16px 24px",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
     boxShadow: "0 2px 20px rgba(0,0,0,0.1)",
     position: "sticky",
     top: 0,
     zIndex: 100,
   },
 
+  navContent: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "12px 16px",
+  },
+
   navBrand: {
     display: "flex",
     alignItems: "center",
-    gap: "12px",
+    gap: "10px",
   },
 
   logo: {
-    fontSize: "28px",
+    fontSize: "24px",
   },
 
   brandText: {
-    fontSize: "20px",
+    fontSize: "18px",
     fontWeight: "800",
     background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
     WebkitBackgroundClip: "text",
@@ -454,48 +489,82 @@ const styles = {
     backgroundClip: "text",
   },
 
-  navRight: {
+  menuBtn: {
+    fontSize: "24px",
+    background: "none",
+    border: "none",
+    color: "#667eea",
+    cursor: "pointer",
+    padding: "8px",
+    display: "none",
+  },
+
+  navDesktop: {
     display: "flex",
-    gap: "12px",
+    gap: "8px",
+    padding: "0 16px 12px",
     flexWrap: "wrap",
   },
 
   navBtn: {
-    padding: "10px 20px",
-    borderRadius: "12px",
+    padding: "8px 16px",
+    borderRadius: "10px",
     textDecoration: "none",
     fontWeight: "600",
-    fontSize: "14px",
+    fontSize: "13px",
     transition: "all 0.2s",
     background: "transparent",
     color: "#1f2937",
+    whiteSpace: "nowrap",
   },
 
-  // Container
+  mobileMenu: {
+    background: "#fff",
+    borderTop: "1px solid #e5e7eb",
+  },
+
+  mobileMenuItem: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    padding: "14px 20px",
+    textDecoration: "none",
+    color: "#1f2937",
+    fontWeight: "600",
+    fontSize: "15px",
+    borderBottom: "1px solid #f3f4f6",
+    transition: "background 0.2s",
+  },
+
+  mobileMenuIcon: {
+    fontSize: "18px",
+    width: "24px",
+    textAlign: "center",
+  },
+
   container: {
     maxWidth: "1000px",
-    margin: "30px auto 0",
-    padding: "0 24px",
+    margin: "20px auto 0",
+    padding: "0 16px",
   },
 
-  // Header Card
   headerCard: {
     background: "#fff",
-    borderRadius: "20px",
-    padding: "30px",
-    marginBottom: "20px",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+    borderRadius: "16px",
+    padding: "20px",
+    marginBottom: "16px",
+    boxShadow: "0 2px 15px rgba(0,0,0,0.08)",
   },
 
   backLink: {
     display: "inline-flex",
     alignItems: "center",
-    gap: "8px",
+    gap: "6px",
     color: "#667eea",
     textDecoration: "none",
-    fontSize: "14px",
+    fontSize: "13px",
     fontWeight: "600",
-    marginBottom: "20px",
+    marginBottom: "16px",
     transition: "all 0.2s",
   },
 
@@ -503,49 +572,48 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    gap: "20px",
+    gap: "12px",
     flexWrap: "wrap",
   },
 
   orderTitle: {
-    fontSize: "32px",
+    fontSize: "24px",
     fontWeight: "800",
     color: "#1f2937",
-    marginBottom: "8px",
+    marginBottom: "6px",
   },
 
   orderMeta: {
-    fontSize: "15px",
+    fontSize: "13px",
     color: "#6b7280",
     fontWeight: "500",
   },
 
-  // Action Card
   actionCard: {
     background: "#fff",
-    borderRadius: "20px",
-    padding: "30px",
-    marginBottom: "20px",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+    borderRadius: "16px",
+    padding: "20px",
+    marginBottom: "16px",
+    boxShadow: "0 2px 15px rgba(0,0,0,0.08)",
   },
 
   actionTitle: {
-    fontSize: "20px",
+    fontSize: "16px",
     fontWeight: "800",
     color: "#1f2937",
-    marginBottom: "24px",
+    marginBottom: "16px",
   },
 
   formGroup: {
-    marginBottom: "24px",
+    marginBottom: "16px",
   },
 
   label: {
     display: "block",
-    fontSize: "15px",
+    fontSize: "13px",
     fontWeight: "700",
     color: "#374151",
-    marginBottom: "10px",
+    marginBottom: "8px",
   },
 
   required: {
@@ -554,10 +622,10 @@ const styles = {
 
   select: {
     width: "100%",
-    padding: "14px 16px",
-    fontSize: "15px",
+    padding: "12px 14px",
+    fontSize: "14px",
     border: "2px solid #e5e7eb",
-    borderRadius: "12px",
+    borderRadius: "10px",
     fontWeight: "600",
     background: "#fff",
     cursor: "pointer",
@@ -573,43 +641,43 @@ const styles = {
   buttonGroup: {
     display: "flex",
     flexDirection: "column",
-    gap: "16px",
+    gap: "12px",
   },
 
   primaryBtn: {
     width: "100%",
-    padding: "16px 24px",
+    padding: "14px 20px",
     background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
     color: "#fff",
     border: "none",
-    borderRadius: "14px",
-    fontSize: "17px",
+    borderRadius: "12px",
+    fontSize: "15px",
     fontWeight: "800",
     cursor: "pointer",
     transition: "all 0.3s",
-    boxShadow: "0 8px 24px rgba(102, 126, 234, 0.4)",
+    boxShadow: "0 6px 20px rgba(102, 126, 234, 0.4)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    gap: "10px",
+    gap: "8px",
   },
 
   completeBtn: {
     width: "100%",
-    padding: "16px 24px",
+    padding: "14px 20px",
     background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
     color: "#fff",
     border: "none",
-    borderRadius: "14px",
-    fontSize: "17px",
+    borderRadius: "12px",
+    fontSize: "15px",
     fontWeight: "800",
     cursor: "pointer",
     transition: "all 0.3s",
-    boxShadow: "0 8px 24px rgba(16, 185, 129, 0.4)",
+    boxShadow: "0 6px 20px rgba(16, 185, 129, 0.4)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    gap: "10px",
+    gap: "8px",
   },
 
   btnDisabled: {
@@ -618,10 +686,10 @@ const styles = {
   },
 
   btnSpinner: {
-    width: "18px",
-    height: "18px",
-    border: "3px solid rgba(255,255,255,0.3)",
-    borderTop: "3px solid #fff",
+    width: "16px",
+    height: "16px",
+    border: "2px solid rgba(255,255,255,0.3)",
+    borderTop: "2px solid #fff",
     borderRadius: "50%",
     animation: "spin 0.8s linear infinite",
   },
@@ -629,78 +697,77 @@ const styles = {
   processingInfo: {
     display: "flex",
     alignItems: "center",
-    gap: "16px",
-    padding: "20px",
+    gap: "12px",
+    padding: "14px",
     background: "#dbeafe",
-    borderRadius: "14px",
+    borderRadius: "12px",
     border: "2px solid #93c5fd",
   },
 
   processingIcon: {
-    fontSize: "32px",
+    fontSize: "24px",
   },
 
   processingTitle: {
-    fontSize: "16px",
+    fontSize: "14px",
     fontWeight: "800",
     color: "#1e40af",
-    marginBottom: "4px",
+    marginBottom: "2px",
   },
 
   processingText: {
-    fontSize: "14px",
+    fontSize: "12px",
     color: "#1e40af",
   },
 
   completedInfo: {
     display: "flex",
     alignItems: "center",
-    gap: "16px",
-    padding: "20px",
+    gap: "12px",
+    padding: "14px",
     background: "#d1fae5",
-    borderRadius: "14px",
+    borderRadius: "12px",
     border: "2px solid #86efac",
   },
 
   completedIcon: {
-    fontSize: "32px",
+    fontSize: "24px",
   },
 
   completedTitle: {
-    fontSize: "16px",
+    fontSize: "14px",
     fontWeight: "800",
     color: "#065f46",
-    marginBottom: "4px",
+    marginBottom: "2px",
   },
 
   completedText: {
-    fontSize: "14px",
+    fontSize: "12px",
     color: "#065f46",
   },
 
-  // Images Card
   imagesCard: {
     background: "#fff",
-    borderRadius: "20px",
-    padding: "30px",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+    borderRadius: "16px",
+    padding: "20px",
+    boxShadow: "0 2px 15px rgba(0,0,0,0.08)",
   },
 
   sectionTitle: {
-    fontSize: "20px",
+    fontSize: "16px",
     fontWeight: "800",
     color: "#1f2937",
-    marginBottom: "24px",
+    marginBottom: "16px",
   },
 
   imageGrid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-    gap: "20px",
+    gridTemplateColumns: "1fr",
+    gap: "16px",
   },
 
   imageCard: {
-    borderRadius: "16px",
+    borderRadius: "12px",
     overflow: "hidden",
     border: "2px solid #e5e7eb",
     transition: "all 0.3s",
@@ -708,7 +775,7 @@ const styles = {
 
   imagePreview: {
     width: "100%",
-    height: "240px",
+    height: "200px",
     backgroundSize: "cover",
     backgroundPosition: "center",
     position: "relative",
@@ -720,154 +787,239 @@ const styles = {
     bottom: 0,
     left: 0,
     right: 0,
-    padding: "12px",
+    padding: "10px",
     background: "linear-gradient(transparent, rgba(0,0,0,0.7))",
   },
 
   imageNumber: {
     color: "#fff",
-    fontSize: "14px",
+    fontSize: "12px",
     fontWeight: "700",
   },
 
   imageActions: {
     display: "flex",
-    padding: "12px",
-    gap: "10px",
+    padding: "10px",
+    gap: "8px",
     background: "#f9fafb",
   },
 
   imageBtn: {
     flex: 1,
-    padding: "10px",
+    padding: "8px",
     textAlign: "center",
     background: "#fff",
     border: "2px solid #e5e7eb",
-    borderRadius: "10px",
+    borderRadius: "8px",
     textDecoration: "none",
     color: "#374151",
-    fontSize: "14px",
+    fontSize: "12px",
     fontWeight: "700",
     transition: "all 0.2s",
   },
 
   noImages: {
     textAlign: "center",
-    padding: "60px 20px",
+    padding: "40px 20px",
     color: "#6b7280",
   },
 
   noImagesIcon: {
-    fontSize: "48px",
+    fontSize: "40px",
     display: "block",
-    marginBottom: "16px",
-  },
-
-  // Loading State
-  loadingState: {
-    maxWidth: "400px",
-    margin: "80px auto",
-    textAlign: "center",
-    color: "#fff",
-    padding: "40px",
-  },
-
-  spinner: {
-    width: "50px",
-    height: "50px",
-    border: "4px solid rgba(255,255,255,0.3)",
-    borderTop: "4px solid #fff",
-    borderRadius: "50%",
-    animation: "spin 1s linear infinite",
-    margin: "0 auto 20px",
-  },
-
-  loadingText: {
-    fontSize: "16px",
-    fontWeight: "600",
-  },
-
-  // Error State
-  errorState: {
-    maxWidth: "400px",
-    margin: "80px auto",
-    textAlign: "center",
-    color: "#fff",
-    padding: "40px",
-    background: "rgba(255,255,255,0.1)",
-    backdropFilter: "blur(10px)",
-    borderRadius: "24px",
-  },
-
-  errorIcon: {
-    fontSize: "64px",
-    marginBottom: "20px",
-  },
-
-  errorTitle: {
-    fontSize: "24px",
-    fontWeight: "800",
     marginBottom: "12px",
   },
 
+  loadingState: {
+    maxWidth: "400px",
+    margin: "60px auto",
+    textAlign: "center",
+    color: "#fff",
+    padding: "32px",
+  },
+
+  spinner: {
+    width: "40px",
+    height: "40px",
+    border: "3px solid rgba(255,255,255,0.3)",
+    borderTop: "3px solid #fff",
+    borderRadius: "50%",
+    animation: "spin 1s linear infinite",
+    margin: "0 auto 16px",
+  },
+
+  loadingText: {
+    fontSize: "14px",
+    fontWeight: "600",
+  },
+
+  errorState: {
+    maxWidth: "400px",
+    margin: "60px auto",
+    textAlign: "center",
+    color: "#fff",
+    padding: "32px",
+    background: "rgba(255,255,255,0.15)",
+    backdropFilter: "blur(10px)",
+    borderRadius: "20px",
+  },
+
+  errorIcon: {
+    fontSize: "48px",
+    marginBottom: "16px",
+  },
+
+  errorTitle: {
+    fontSize: "20px",
+    fontWeight: "800",
+    marginBottom: "8px",
+  },
+
   errorText: {
-    fontSize: "16px",
+    fontSize: "14px",
     opacity: 0.9,
-    marginBottom: "24px",
+    marginBottom: "20px",
   },
 
   backBtn: {
     display: "inline-block",
-    padding: "14px 28px",
+    padding: "12px 24px",
     background: "#fff",
     color: "#667eea",
-    borderRadius: "12px",
+    borderRadius: "10px",
     textDecoration: "none",
     fontWeight: "700",
-    fontSize: "16px",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
+    fontSize: "14px",
   },
 
-  // Responsive
-  "@media (max-width: 768px)": {
-    nav: {
-      flexDirection: "column",
-      gap: "16px",
-      padding: "16px",
-    },
-
-    navRight: {
-      width: "100%",
-      justifyContent: "center",
-    },
-
+  "@media (min-width: 769px)": {
     container: {
-      padding: "0 16px",
+      margin: "30px auto 0",
+      padding: "0 24px",
     },
-
     headerCard: {
-      padding: "20px",
+      padding: "30px",
+      borderRadius: "20px",
+      marginBottom: "20px",
     },
-
+    backLink: {
+      fontSize: "14px",
+      marginBottom: "20px",
+    },
     orderTitle: {
-      fontSize: "24px",
+      fontSize: "32px",
+      marginBottom: "8px",
     },
-
+    orderMeta: {
+      fontSize: "15px",
+    },
     actionCard: {
-      padding: "20px",
+      padding: "30px",
+      borderRadius: "20px",
+      marginBottom: "20px",
     },
-
+    actionTitle: {
+      fontSize: "20px",
+      marginBottom: "24px",
+    },
+    formGroup: {
+      marginBottom: "24px",
+    },
+    label: {
+      fontSize: "15px",
+      marginBottom: "10px",
+    },
+    select: {
+      padding: "14px 16px",
+      fontSize: "15px",
+    },
+    buttonGroup: {
+      gap: "16px",
+    },
+    primaryBtn: {
+      padding: "16px 24px",
+      fontSize: "17px",
+    },
+    completeBtn: {
+      padding: "16px 24px",
+      fontSize: "17px",
+    },
+    processingInfo: {
+      padding: "20px",
+      gap: "16px",
+    },
+    processingIcon: {
+      fontSize: "32px",
+    },
+    processingTitle: {
+      fontSize: "16px",
+      marginBottom: "4px",
+    },
+    processingText: {
+      fontSize: "14px",
+    },
+    completedInfo: {
+      padding: "20px",
+      gap: "16px",
+    },
+    completedIcon: {
+      fontSize: "32px",
+    },
+    completedTitle: {
+      fontSize: "16px",
+      marginBottom: "4px",
+    },
+    completedText: {
+      fontSize: "14px",
+    },
     imagesCard: {
-      padding: "20px",
+      padding: "30px",
+      borderRadius: "20px",
     },
-
+    sectionTitle: {
+      fontSize: "20px",
+      marginBottom: "24px",
+    },
     imageGrid: {
-      gridTemplateColumns: "1fr",
+      gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+      gap: "20px",
+    },
+    imagePreview: {
+      height: "240px",
+    },
+    imageOverlay: {
+      padding: "12px",
+    },
+    imageNumber: {
+      fontSize: "14px",
+    },
+    imageActions: {
+      padding: "12px",
+      gap: "10px",
+    },
+    imageBtn: {
+      padding: "10px",
+      fontSize: "14px",
+    },
+    noImages: {
+      padding: "60px 20px",
+    },
+    noImagesIcon: {
+      fontSize: "48px",
+      marginBottom: "16px",
+    },
+  },
+
+  "@media (max-width: 768px)": {
+    menuBtn: {
+      display: "block",
+    },
+    navDesktop: {
+      display: "none",
     },
   },
 };
 
-// Add CSS animations
 if (typeof document !== "undefined") {
   const style = document.createElement("style");
   style.textContent = `
@@ -882,27 +1034,33 @@ if (typeof document !== "undefined") {
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
     
-    button:hover:not(:disabled) {
-      transform: translateY(-2px);
-    }
-    
-    button:active:not(:disabled) {
-      transform: translateY(0);
-    }
-    
-    .imageCard:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-    }
-    
-    .imageBtn:hover {
-      background: #667eea;
-      color: #fff;
-      border-color: #667eea;
-    }
-    
-    .backLink:hover {
-      transform: translateX(-4px);
+    @media (hover: hover) {
+      button:hover:not(:disabled) {
+        transform: translateY(-2px);
+      }
+      
+      button:active:not(:disabled) {
+        transform: translateY(0);
+      }
+      
+      .imageCard:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+      }
+      
+      .imageBtn:hover {
+        background: #667eea;
+        color: #fff;
+        border-color: #667eea;
+      }
+      
+      .backLink:hover {
+        transform: translateX(-4px);
+      }
+
+      .mobileMenuItem:hover {
+        background: #f9fafb;
+      }
     }
   `;
   document.head.appendChild(style);
