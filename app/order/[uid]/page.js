@@ -10,12 +10,31 @@ export default function OrderPage({ params }) {
   const [loading, setLoading] = useState(true);
   const [selectedMember, setSelectedMember] = useState("");
   const [processing, setProcessing] = useState(false);
-
-  const teamMembers = ["Arun", "Sreerag", "Rahul"];
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [engraverId, setEngraverId] = useState("");
 
   useEffect(() => {
     loadOrder();
+    loadTeamMembers();
   }, [uid]);
+
+  async function loadTeamMembers() {
+    try {
+      const res = await fetch('/api/employees?role=engraver');
+      const data = await res.json();
+      
+      if (data.success && data.employees) {
+        setTeamMembers(data.employees);
+      }
+    } catch (error) {
+      console.error("Failed to load team members:", error);
+      setTeamMembers([
+        { id: 1, name: 'Arun' },
+        { id: 2, name: 'Sreerag' },
+        { id: 3, name: 'Rahul' }
+      ]);
+    }
+  }
 
   async function loadOrder() {
     try {
@@ -26,6 +45,7 @@ export default function OrderPage({ params }) {
       if (data.success && data.order) {
         setOrder(data.order);
         setSelectedMember(data.order.teamMember || "");
+        setEngraverId(data.order.engraverId || "");
       }
     } catch (error) {
       console.error("Failed to load order:", error);
@@ -54,6 +74,7 @@ export default function OrderPage({ params }) {
         body: JSON.stringify({
           status: "processing",
           teamMember: selectedMember,
+          engraverId: engraverId,
         }),
       });
 
@@ -200,7 +221,11 @@ export default function OrderPage({ params }) {
             </label>
             <select
               value={selectedMember}
-              onChange={(e) => setSelectedMember(e.target.value)}
+              onChange={(e) => {
+                const selected = teamMembers.find(m => m.name === e.target.value);
+                setSelectedMember(e.target.value);
+                setEngraverId(selected?.id || "");
+              }}
               disabled={isLocked || processing}
               style={{
                 ...styles.select,
@@ -209,7 +234,7 @@ export default function OrderPage({ params }) {
             >
               <option value="">Choose team member...</option>
               {teamMembers.map(member => (
-                <option key={member} value={member}>{member}</option>
+                <option key={member.id} value={member.name}>{member.name}</option>
               ))}
             </select>
           </div>
