@@ -11,6 +11,7 @@ export default function UploadPage() {
   const [images, setImages] = useState([{ url: "", productTypeId: "" }]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
   
   const [designers, setDesigners] = useState([]);
   const [productTypes, setProductTypes] = useState([]);
@@ -119,26 +120,57 @@ export default function UploadPage() {
 
   return (
     <main style={styles.wrapper}>
-      {/* Top Navigation */}
+      {/* Compact Mobile Navigation */}
       <nav style={styles.nav}>
-        <div style={styles.navBrand}>
-          <span style={styles.logo}>🖼️</span>
-          <span style={styles.brandText}>What The Frame</span>
+        <div style={styles.navContent}>
+          <div style={styles.navBrand}>
+            <span style={styles.logo}>🖼️</span>
+            <span style={styles.brandText}>What The Frame</span>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button 
+            onClick={() => setMenuOpen(!menuOpen)} 
+            style={styles.menuBtn}
+            aria-label="Toggle menu"
+          >
+            {menuOpen ? "✕" : "☰"}
+          </button>
         </div>
 
-        <div style={styles.navRight}>
-          <Link href="/" style={styles.navBtn}>
-            Dashboard
-          </Link>
-
-          <Link href="/upload" style={{...styles.navBtn, ...styles.navBtnActive}}>
-            + New Order
-          </Link>
-
-          <Link href="/settings" style={styles.navBtn}>
-            ⚙️ Settings
-          </Link>
+        {/* Desktop Navigation */}
+        <div style={styles.navDesktop}>
+          <Link href="/" style={styles.navBtn}>Dashboard</Link>
+          <Link href="/upload" style={{...styles.navBtn, ...styles.navBtnActive}}>+ New Order</Link>
+          <Link href="/analytics" style={styles.navBtn}>📊 Analytics</Link>
+          <Link href="/recent" style={styles.navBtn}>📋 Recent</Link>
+          <Link href="/settings" style={styles.navBtn}>⚙️ Settings</Link>
+          <Link href="/backup" style={styles.navBtn}>🔄 Backup</Link>
         </div>
+
+        {/* Mobile Dropdown Menu */}
+        {menuOpen && (
+          <div style={styles.mobileMenu}>
+            <Link href="/" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>🏠</span> Dashboard
+            </Link>
+            <Link href="/upload" style={{...styles.mobileMenuItem, ...styles.mobileMenuItemActive}} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>➕</span> New Order
+            </Link>
+            <Link href="/analytics" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>📊</span> Analytics
+            </Link>
+            <Link href="/recent" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>📋</span> Recent Orders
+            </Link>
+            <Link href="/settings" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>⚙️</span> Settings
+            </Link>
+            <Link href="/backup" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>🔄</span> Backup
+            </Link>
+          </div>
+        )}
       </nav>
 
       {/* Form Container */}
@@ -154,14 +186,14 @@ export default function UploadPage() {
           {error && (
             <div style={styles.errorBox}>
               <span style={styles.errorIcon}>⚠️</span>
-              {error}
+              <div style={styles.errorText}>{error}</div>
             </div>
           )}
 
           {/* Order Number Input */}
           <div style={styles.formGroup}>
             <label style={styles.label}>
-              Shopify Order Number <span style={styles.required}>*</span>
+              Order Number <span style={styles.required}>*</span>
             </label>
             <input
               type="text"
@@ -179,7 +211,7 @@ export default function UploadPage() {
           {/* Designer Selection */}
           <div style={styles.formGroup}>
             <label style={styles.label}>
-              Designer (Who's uploading?) <span style={styles.required}>*</span>
+              Designer <span style={styles.required}>*</span>
             </label>
             <select
               value={designerId}
@@ -199,7 +231,7 @@ export default function UploadPage() {
             </select>
             {designers.length === 0 && (
               <p style={styles.helpText}>
-                No designers found. <Link href="/settings" style={styles.link}>Add designers in Settings</Link>
+                No designers found. <Link href="/settings" style={styles.link}>Add in Settings</Link>
               </p>
             )}
           </div>
@@ -210,8 +242,8 @@ export default function UploadPage() {
               <label style={styles.label}>
                 Design Images <span style={styles.required}>*</span>
               </label>
-              <button onClick={addImageField} style={styles.addBtn} disabled={loading}>
-                + Add Another Image
+              <button onClick={addImageField} style={styles.addBtn} disabled={loading} type="button">
+                + Add
               </button>
             </div>
 
@@ -219,13 +251,14 @@ export default function UploadPage() {
               {images.map((image, i) => (
                 <div key={i} style={styles.imageCard}>
                   <div style={styles.imageHeader}>
-                    <strong>Image {i + 1}</strong>
+                    <span style={styles.imageNumber}>Image {i + 1}</span>
                     {images.length > 1 && (
                       <button
                         onClick={() => removeImageField(i)}
                         style={styles.removeBtn}
                         disabled={loading}
-                        title="Remove this image"
+                        title="Remove"
+                        type="button"
                       >
                         ×
                       </button>
@@ -237,10 +270,10 @@ export default function UploadPage() {
                       <label style={styles.smallLabel}>Google Drive Link</label>
                       <input
                         type="url"
-                        placeholder="Paste Google Drive link"
+                        placeholder="Paste link here"
                         value={image.url}
                         onChange={(e) => updateImage(i, "url", e.target.value)}
-                        style={styles.input}
+                        style={styles.inputSmall}
                         disabled={loading}
                       />
                     </div>
@@ -250,7 +283,7 @@ export default function UploadPage() {
                       <select
                         value={image.productTypeId}
                         onChange={(e) => updateImage(i, "productTypeId", parseInt(e.target.value))}
-                        style={styles.select}
+                        style={styles.selectSmall}
                         disabled={loading}
                       >
                         <option value="">Select product...</option>
@@ -266,8 +299,8 @@ export default function UploadPage() {
               ))}
             </div>
 
-            <div style={styles.helpText}>
-              💡 <strong>Tip:</strong> Right-click image in Google Drive → Get link → Copy and paste here
+            <div style={styles.tipBox}>
+              💡 <strong>Tip:</strong> Right-click image in Drive → Get link → Copy & paste
             </div>
           </div>
 
@@ -279,11 +312,12 @@ export default function UploadPage() {
               ...(loading ? styles.submitBtnLoading : {})
             }}
             disabled={loading}
+            type="button"
           >
             {loading ? (
               <>
                 <span style={styles.spinner}></span>
-                Creating Order...
+                Creating...
               </>
             ) : (
               "Create Order"
@@ -292,12 +326,12 @@ export default function UploadPage() {
 
           {/* Info Box */}
           <div style={styles.infoBox}>
-            <strong>📋 What happens next?</strong>
+            <div style={styles.infoTitle}>📋 What happens next?</div>
             <ol style={styles.infoList}>
-              <li>Order appears on dashboard as "Pending"</li>
-              <li>Engraving team claims and processes the order</li>
-              <li>Processing time is automatically tracked</li>
-              <li>Data exports to Google Sheets for incentive calculation</li>
+              <li>Order appears as "Pending"</li>
+              <li>Team claims and processes</li>
+              <li>Time tracked automatically</li>
+              <li>Data exports to Sheets</li>
             </ol>
           </div>
         </div>
@@ -314,30 +348,33 @@ const styles = {
   },
 
   nav: {
-    background: "rgba(255, 255, 255, 0.95)",
+    background: "rgba(255, 255, 255, 0.98)",
     backdropFilter: "blur(10px)",
-    padding: "16px 24px",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
     boxShadow: "0 2px 20px rgba(0,0,0,0.1)",
     position: "sticky",
     top: 0,
     zIndex: 100,
   },
 
+  navContent: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "12px 16px",
+  },
+
   navBrand: {
     display: "flex",
     alignItems: "center",
-    gap: "12px",
+    gap: "10px",
   },
 
   logo: {
-    fontSize: "28px",
+    fontSize: "24px",
   },
 
   brandText: {
-    fontSize: "20px",
+    fontSize: "18px",
     fontWeight: "800",
     background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
     WebkitBackgroundClip: "text",
@@ -345,54 +382,93 @@ const styles = {
     backgroundClip: "text",
   },
 
-  navRight: {
+  menuBtn: {
+    fontSize: "24px",
+    background: "none",
+    border: "none",
+    color: "#667eea",
+    cursor: "pointer",
+    padding: "8px",
+    display: "none",
+  },
+
+  navDesktop: {
     display: "flex",
-    gap: "12px",
+    gap: "8px",
+    padding: "0 16px 12px",
     flexWrap: "wrap",
   },
 
   navBtn: {
-    padding: "10px 20px",
-    borderRadius: "12px",
+    padding: "8px 16px",
+    borderRadius: "10px",
     textDecoration: "none",
     fontWeight: "600",
-    fontSize: "14px",
+    fontSize: "13px",
     transition: "all 0.2s",
     background: "transparent",
     color: "#1f2937",
-    border: "none",
-    cursor: "pointer",
+    whiteSpace: "nowrap",
   },
 
   navBtnActive: {
     background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
     color: "#fff",
-    boxShadow: "0 4px 15px rgba(102, 126, 234, 0.4)",
+    boxShadow: "0 2px 10px rgba(102, 126, 234, 0.4)",
+  },
+
+  mobileMenu: {
+    background: "#fff",
+    borderTop: "1px solid #e5e7eb",
+  },
+
+  mobileMenuItem: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    padding: "14px 20px",
+    textDecoration: "none",
+    color: "#1f2937",
+    fontWeight: "600",
+    fontSize: "15px",
+    borderBottom: "1px solid #f3f4f6",
+    transition: "background 0.2s",
+  },
+
+  mobileMenuItemActive: {
+    background: "#f0f9ff",
+    color: "#667eea",
+  },
+
+  mobileMenuIcon: {
+    fontSize: "18px",
+    width: "24px",
+    textAlign: "center",
   },
 
   container: {
-    maxWidth: "800px",
-    margin: "40px auto 0",
-    padding: "0 24px",
+    maxWidth: "700px",
+    margin: "20px auto 0",
+    padding: "0 16px",
   },
 
   formCard: {
     background: "#fff",
-    borderRadius: "24px",
-    padding: "40px",
-    boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
+    borderRadius: "20px",
+    padding: "24px",
+    boxShadow: "0 10px 40px rgba(0,0,0,0.15)",
   },
 
   header: {
-    marginBottom: "32px",
+    marginBottom: "24px",
     textAlign: "center",
   },
 
   title: {
-    fontSize: "32px",
+    fontSize: "24px",
     fontWeight: "800",
     color: "#1f2937",
-    marginBottom: "8px",
+    marginBottom: "6px",
     background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
     WebkitBackgroundClip: "text",
     WebkitTextFillColor: "transparent",
@@ -400,44 +476,49 @@ const styles = {
   },
 
   subtitle: {
-    fontSize: "16px",
+    fontSize: "14px",
     color: "#6b7280",
-    lineHeight: "1.6",
+    lineHeight: "1.5",
   },
 
   errorBox: {
     background: "#fef2f2",
     border: "2px solid #fca5a5",
     borderRadius: "12px",
-    padding: "16px",
-    marginBottom: "24px",
+    padding: "12px",
+    marginBottom: "20px",
     color: "#991b1b",
-    fontSize: "14px",
+    fontSize: "13px",
     fontWeight: "600",
     display: "flex",
-    alignItems: "center",
-    gap: "12px",
+    alignItems: "flex-start",
+    gap: "10px",
   },
 
   errorIcon: {
-    fontSize: "20px",
+    fontSize: "18px",
+    flexShrink: 0,
+  },
+
+  errorText: {
+    flex: 1,
   },
 
   formGroup: {
-    marginBottom: "28px",
+    marginBottom: "20px",
   },
 
   label: {
     display: "block",
-    fontSize: "15px",
+    fontSize: "14px",
     fontWeight: "700",
     color: "#374151",
-    marginBottom: "10px",
+    marginBottom: "8px",
   },
 
   smallLabel: {
     display: "block",
-    fontSize: "13px",
+    fontSize: "12px",
     fontWeight: "600",
     color: "#6b7280",
     marginBottom: "6px",
@@ -451,15 +532,26 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "16px",
+    marginBottom: "12px",
   },
 
   input: {
     width: "100%",
-    padding: "14px 16px",
-    fontSize: "15px",
+    padding: "12px 14px",
+    fontSize: "14px",
     border: "2px solid #e5e7eb",
-    borderRadius: "12px",
+    borderRadius: "10px",
+    transition: "all 0.2s",
+    fontFamily: "inherit",
+    backgroundColor: "#fff",
+  },
+
+  inputSmall: {
+    width: "100%",
+    padding: "10px 12px",
+    fontSize: "13px",
+    border: "2px solid #e5e7eb",
+    borderRadius: "8px",
     transition: "all 0.2s",
     fontFamily: "inherit",
     backgroundColor: "#fff",
@@ -467,10 +559,23 @@ const styles = {
 
   select: {
     width: "100%",
-    padding: "14px 16px",
-    fontSize: "15px",
+    padding: "12px 14px",
+    fontSize: "14px",
     border: "2px solid #e5e7eb",
-    borderRadius: "12px",
+    borderRadius: "10px",
+    transition: "all 0.2s",
+    fontFamily: "inherit",
+    backgroundColor: "#fff",
+    fontWeight: "600",
+    cursor: "pointer",
+  },
+
+  selectSmall: {
+    width: "100%",
+    padding: "10px 12px",
+    fontSize: "13px",
+    border: "2px solid #e5e7eb",
+    borderRadius: "8px",
     transition: "all 0.2s",
     fontFamily: "inherit",
     backgroundColor: "#fff",
@@ -481,13 +586,13 @@ const styles = {
   imagesList: {
     display: "flex",
     flexDirection: "column",
-    gap: "16px",
+    gap: "12px",
   },
 
   imageCard: {
-    padding: "20px",
+    padding: "14px",
     background: "#f9fafb",
-    borderRadius: "16px",
+    borderRadius: "12px",
     border: "2px solid #e5e7eb",
   },
 
@@ -495,8 +600,11 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "16px",
-    fontSize: "15px",
+    marginBottom: "12px",
+  },
+
+  imageNumber: {
+    fontSize: "13px",
     fontWeight: "700",
     color: "#374151",
   },
@@ -504,7 +612,7 @@ const styles = {
   imageFields: {
     display: "flex",
     flexDirection: "column",
-    gap: "12px",
+    gap: "10px",
   },
 
   fieldGroup: {
@@ -512,24 +620,25 @@ const styles = {
   },
 
   addBtn: {
-    padding: "8px 16px",
+    padding: "6px 14px",
     background: "#667eea",
     border: "none",
-    borderRadius: "10px",
-    fontSize: "13px",
+    borderRadius: "8px",
+    fontSize: "12px",
     fontWeight: "700",
     color: "#fff",
     cursor: "pointer",
     transition: "all 0.2s",
+    whiteSpace: "nowrap",
   },
 
   removeBtn: {
-    width: "32px",
-    height: "32px",
+    width: "28px",
+    height: "28px",
     background: "#fee2e2",
     border: "2px solid #fecaca",
-    borderRadius: "8px",
-    fontSize: "20px",
+    borderRadius: "7px",
+    fontSize: "18px",
     fontWeight: "700",
     color: "#dc2626",
     cursor: "pointer",
@@ -537,16 +646,28 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    flexShrink: 0,
   },
 
   helpText: {
-    fontSize: "13px",
+    fontSize: "12px",
+    color: "#6b7280",
+    marginTop: "8px",
+    padding: "10px",
+    background: "#f0f9ff",
+    borderRadius: "8px",
+    border: "1px solid #bfdbfe",
+  },
+
+  tipBox: {
+    fontSize: "12px",
     color: "#6b7280",
     marginTop: "10px",
-    padding: "12px",
+    padding: "10px",
     background: "#f0f9ff",
-    borderRadius: "10px",
+    borderRadius: "8px",
     border: "1px solid #bfdbfe",
+    lineHeight: "1.5",
   },
 
   link: {
@@ -557,20 +678,20 @@ const styles = {
 
   submitBtn: {
     width: "100%",
-    padding: "16px 24px",
+    padding: "14px 20px",
     background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
     color: "#fff",
     border: "none",
-    borderRadius: "14px",
-    fontSize: "17px",
+    borderRadius: "12px",
+    fontSize: "15px",
     fontWeight: "800",
     cursor: "pointer",
     transition: "all 0.3s",
-    boxShadow: "0 8px 24px rgba(102, 126, 234, 0.4)",
+    boxShadow: "0 6px 20px rgba(102, 126, 234, 0.4)",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    gap: "10px",
+    gap: "8px",
   },
 
   submitBtnLoading: {
@@ -579,48 +700,59 @@ const styles = {
   },
 
   spinner: {
-    width: "18px",
-    height: "18px",
-    border: "3px solid rgba(255,255,255,0.3)",
-    borderTop: "3px solid #fff",
+    width: "16px",
+    height: "16px",
+    border: "2px solid rgba(255,255,255,0.3)",
+    borderTop: "2px solid #fff",
     borderRadius: "50%",
     animation: "spin 0.8s linear infinite",
   },
 
   infoBox: {
-    marginTop: "32px",
-    padding: "20px",
+    marginTop: "24px",
+    padding: "16px",
     background: "#f0fdf4",
     border: "2px solid #86efac",
-    borderRadius: "14px",
-    fontSize: "14px",
+    borderRadius: "12px",
+    fontSize: "13px",
     color: "#166534",
   },
 
+  infoTitle: {
+    fontWeight: "700",
+    marginBottom: "8px",
+  },
+
   infoList: {
-    marginTop: "12px",
-    paddingLeft: "20px",
-    lineHeight: "1.8",
+    paddingLeft: "18px",
+    margin: "0",
+    lineHeight: "1.7",
+  },
+
+  "@media (min-width: 769px)": {
+    container: {
+      maxWidth: "800px",
+      margin: "40px auto 0",
+      padding: "0 24px",
+    },
+    formCard: {
+      padding: "40px",
+      borderRadius: "24px",
+    },
+    title: {
+      fontSize: "32px",
+    },
+    subtitle: {
+      fontSize: "16px",
+    },
   },
 
   "@media (max-width: 768px)": {
-    nav: {
-      flexDirection: "column",
-      gap: "16px",
-      padding: "16px",
+    menuBtn: {
+      display: "block",
     },
-
-    navRight: {
-      width: "100%",
-      justifyContent: "center",
-    },
-
-    formCard: {
-      padding: "24px",
-    },
-
-    container: {
-      padding: "0 16px",
+    navDesktop: {
+      display: "none",
     },
   },
 };
@@ -637,6 +769,31 @@ if (typeof document !== "undefined") {
       outline: none;
       border-color: #667eea;
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    @media (hover: hover) {
+      .addBtn:hover {
+        background: #5568d3;
+        transform: translateY(-1px);
+      }
+
+      .removeBtn:hover {
+        background: #fecaca;
+        transform: scale(1.05);
+      }
+
+      .submitBtn:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(102, 126, 234, 0.5);
+      }
+
+      .mobileMenuItem:hover {
+        background: #f9fafb;
+      }
+    }
+
+    .submitBtn:active:not(:disabled) {
+      transform: translateY(0);
     }
   `;
   document.head.appendChild(style);
