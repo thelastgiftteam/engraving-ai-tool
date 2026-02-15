@@ -1,32 +1,65 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 export default function UploadPage() {
   const router = useRouter();
   const [orderId, setOrderId] = useState("");
-  const [links, setLinks] = useState([""]);
+  const [designerId, setDesignerId] = useState("");
+  const [images, setImages] = useState([{ url: "", productTypeId: "" }]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  
+  const [designers, setDesigners] = useState([]);
+  const [productTypes, setProductTypes] = useState([]);
 
-  function addField() {
-    setLinks([...links, ""]);
+  useEffect(() => {
+    loadDesigners();
+    loadProductTypes();
+  }, []);
+
+  async function loadDesigners() {
+    try {
+      const res = await fetch("/api/employees?role=designer");
+      const data = await res.json();
+      if (data.success) {
+        setDesigners(data.employees);
+      }
+    } catch (error) {
+      console.error("Failed to load designers:", error);
+    }
   }
 
-  function removeField(index) {
-    if (links.length === 1) return; // Keep at least one field
-    const copy = [...links];
+  async function loadProductTypes() {
+    try {
+      const res = await fetch("/api/product-types");
+      const data = await res.json();
+      if (data.success) {
+        setProductTypes(data.productTypes);
+      }
+    } catch (error) {
+      console.error("Failed to load product types:", error);
+    }
+  }
+
+  function addImageField() {
+    setImages([...images, { url: "", productTypeId: "" }]);
+  }
+
+  function removeImageField(index) {
+    if (images.length === 1) return;
+    const copy = [...images];
     copy.splice(index, 1);
-    setLinks(copy);
+    setImages(copy);
   }
 
-  function updateLink(i, value) {
-    const copy = [...links];
-    copy[i] = value;
-    setLinks(copy);
-    setError(""); // Clear error when user types
+  function updateImage(i, field, value) {
+    const copy = [...images];
+    copy[i][field] = value;
+    setImages(copy);
+    setError("");
   }
 
   async function submit() {
@@ -38,9 +71,21 @@ export default function UploadPage() {
       return;
     }
 
-    const validLinks = links.filter(l => l.trim() !== "");
-    if (validLinks.length === 0) {
+    if (!designerId) {
+      setError("Please select a designer");
+      return;
+    }
+
+    const validImages = images.filter(img => img.url.trim() !== "");
+    if (validImages.length === 0) {
       setError("Please add at least one image link");
+      return;
+    }
+
+    // Check if all images have product types
+    const missingProductType = validImages.some(img => !img.productTypeId);
+    if (missingProductType) {
+      setError("Please select product type for all images");
       return;
     }
 
@@ -52,14 +97,14 @@ export default function UploadPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           orderNumber: orderId.trim(),
-          images: validLinks,
+          designerId: parseInt(designerId),
+          images: validImages,
         }),
       });
 
       const data = await response.json();
 
       if (data.success) {
-        // Success! Navigate to the new order
         router.push(`/order/${data.order.uid}`);
       } else {
         setError(data.error || "Failed to create order");
@@ -89,6 +134,10 @@ export default function UploadPage() {
           <Link href="/upload" style={{...styles.navBtn, ...styles.navBtnActive}}>
             + New Order
           </Link>
+
+          <Link href="/settings" style={styles.navBtn}>
+            ⚙️ Settings
+          </Link>
         </div>
       </nav>
 
@@ -98,7 +147,7 @@ export default function UploadPage() {
           <div style={styles.header}>
             <h1 style={styles.title}>Create New Order</h1>
             <p style={styles.subtitle}>
-              Enter the Shopify order number and paste Google Drive image links
+              Enter order details and design information
             </p>
           </div>
 
@@ -112,7 +161,7 @@ export default function UploadPage() {
           {/* Order Number Input */}
           <div style={styles.formGroup}>
             <label style={styles.label}>
-              Order Number <span style={styles.required}>*</span>
+              Shopify Order Number <span style={styles.required}>*</span>
             </label>
             <input
               type="text"
@@ -127,44 +176,98 @@ export default function UploadPage() {
             />
           </div>
 
-          {/* Image Links Section */}
+          {/* Designer Selection */}
+          <div style={styles.formGroup}>
+            <label style={styles.label}>
+              Designer (Who's uploading?) <span style={styles.required}>*</span>
+            </label>
+            <select
+              value={designerId}
+              onChange={(e) => {
+                setDesignerId(e.target.value);
+                setError("");
+              }}
+              style={styles.select}
+              disabled={loading}
+            >
+              <option value="">Select designer...</option>
+              {designers.map(designer => (
+                <option key={designer.id} value={designer.id}>
+                  {designer.name}
+                </option>
+              ))}
+            </select>
+            {designers.length === 0 && (
+              <p style={styles.helpText}>
+                No designers found. <Link href="/settings" style={styles.link}>Add designers in Settings</Link>
+              </p>
+            )}
+          </div>
+
+          {/* Images Section */}
           <div style={styles.formGroup}>
             <div style={styles.labelRow}>
               <label style={styles.label}>
-                Google Drive Image Links <span style={styles.required}>*</span>
+                Design Images <span style={styles.required}>*</span>
               </label>
-              <button onClick={addField} style={styles.addBtn} disabled={loading}>
-                + Add Another
+              <button onClick={addImageField} style={styles.addBtn} disabled={loading}>
+                + Add Another Image
               </button>
             </div>
 
-            <div style={styles.linksList}>
-              {links.map((link, i) => (
-                <div key={i} style={styles.linkRow}>
-                  <input
-                    type="url"
-                    placeholder="Paste Google Drive link here"
-                    value={link}
-                    onChange={(e) => updateLink(i, e.target.value)}
-                    style={styles.input}
-                    disabled={loading}
-                  />
-                  {links.length > 1 && (
-                    <button
-                      onClick={() => removeField(i)}
-                      style={styles.removeBtn}
-                      disabled={loading}
-                      title="Remove this link"
-                    >
-                      ×
-                    </button>
-                  )}
+            <div style={styles.imagesList}>
+              {images.map((image, i) => (
+                <div key={i} style={styles.imageCard}>
+                  <div style={styles.imageHeader}>
+                    <strong>Image {i + 1}</strong>
+                    {images.length > 1 && (
+                      <button
+                        onClick={() => removeImageField(i)}
+                        style={styles.removeBtn}
+                        disabled={loading}
+                        title="Remove this image"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+
+                  <div style={styles.imageFields}>
+                    <div style={styles.fieldGroup}>
+                      <label style={styles.smallLabel}>Google Drive Link</label>
+                      <input
+                        type="url"
+                        placeholder="Paste Google Drive link"
+                        value={image.url}
+                        onChange={(e) => updateImage(i, "url", e.target.value)}
+                        style={styles.input}
+                        disabled={loading}
+                      />
+                    </div>
+
+                    <div style={styles.fieldGroup}>
+                      <label style={styles.smallLabel}>Product Type</label>
+                      <select
+                        value={image.productTypeId}
+                        onChange={(e) => updateImage(i, "productTypeId", parseInt(e.target.value))}
+                        style={styles.select}
+                        disabled={loading}
+                      >
+                        <option value="">Select product...</option>
+                        {productTypes.map(pt => (
+                          <option key={pt.id} value={pt.id}>
+                            {pt.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
 
             <div style={styles.helpText}>
-              💡 Tip: Right-click an image in Google Drive → Get link → Copy and paste here
+              💡 <strong>Tip:</strong> Right-click image in Google Drive → Get link → Copy and paste here
             </div>
           </div>
 
@@ -191,9 +294,10 @@ export default function UploadPage() {
           <div style={styles.infoBox}>
             <strong>📋 What happens next?</strong>
             <ol style={styles.infoList}>
-              <li>Your order will appear on the dashboard as "Pending"</li>
-              <li>Team members can claim and start processing the order</li>
-              <li>Once engraving is done, they'll mark it as "Completed"</li>
+              <li>Order appears on dashboard as "Pending"</li>
+              <li>Engraving team claims and processes the order</li>
+              <li>Processing time is automatically tracked</li>
+              <li>Data exports to Google Sheets for incentive calculation</li>
             </ol>
           </div>
         </div>
@@ -209,7 +313,6 @@ const styles = {
     paddingBottom: "40px",
   },
 
-  // Navigation
   nav: {
     background: "rgba(255, 255, 255, 0.95)",
     backdropFilter: "blur(10px)",
@@ -267,9 +370,8 @@ const styles = {
     boxShadow: "0 4px 15px rgba(102, 126, 234, 0.4)",
   },
 
-  // Container
   container: {
-    maxWidth: "700px",
+    maxWidth: "800px",
     margin: "40px auto 0",
     padding: "0 24px",
   },
@@ -303,7 +405,6 @@ const styles = {
     lineHeight: "1.6",
   },
 
-  // Error Box
   errorBox: {
     background: "#fef2f2",
     border: "2px solid #fca5a5",
@@ -322,7 +423,6 @@ const styles = {
     fontSize: "20px",
   },
 
-  // Form Groups
   formGroup: {
     marginBottom: "28px",
   },
@@ -335,6 +435,14 @@ const styles = {
     marginBottom: "10px",
   },
 
+  smallLabel: {
+    display: "block",
+    fontSize: "13px",
+    fontWeight: "600",
+    color: "#6b7280",
+    marginBottom: "6px",
+  },
+
   required: {
     color: "#ef4444",
   },
@@ -343,7 +451,7 @@ const styles = {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "10px",
+    marginBottom: "16px",
   },
 
   input: {
@@ -357,42 +465,78 @@ const styles = {
     backgroundColor: "#fff",
   },
 
-  linksList: {
+  select: {
+    width: "100%",
+    padding: "14px 16px",
+    fontSize: "15px",
+    border: "2px solid #e5e7eb",
+    borderRadius: "12px",
+    transition: "all 0.2s",
+    fontFamily: "inherit",
+    backgroundColor: "#fff",
+    fontWeight: "600",
+    cursor: "pointer",
+  },
+
+  imagesList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "16px",
+  },
+
+  imageCard: {
+    padding: "20px",
+    background: "#f9fafb",
+    borderRadius: "16px",
+    border: "2px solid #e5e7eb",
+  },
+
+  imageHeader: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "16px",
+    fontSize: "15px",
+    fontWeight: "700",
+    color: "#374151",
+  },
+
+  imageFields: {
     display: "flex",
     flexDirection: "column",
     gap: "12px",
   },
 
-  linkRow: {
-    display: "flex",
-    gap: "10px",
-    alignItems: "center",
+  fieldGroup: {
+    flex: 1,
   },
 
   addBtn: {
     padding: "8px 16px",
-    background: "#f3f4f6",
-    border: "2px solid #e5e7eb",
+    background: "#667eea",
+    border: "none",
     borderRadius: "10px",
     fontSize: "13px",
     fontWeight: "700",
-    color: "#374151",
+    color: "#fff",
     cursor: "pointer",
     transition: "all 0.2s",
   },
 
   removeBtn: {
-    width: "40px",
-    height: "48px",
+    width: "32px",
+    height: "32px",
     background: "#fee2e2",
     border: "2px solid #fecaca",
-    borderRadius: "10px",
-    fontSize: "24px",
+    borderRadius: "8px",
+    fontSize: "20px",
     fontWeight: "700",
     color: "#dc2626",
     cursor: "pointer",
     transition: "all 0.2s",
-    flexShrink: 0,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
 
   helpText: {
@@ -400,12 +544,17 @@ const styles = {
     color: "#6b7280",
     marginTop: "10px",
     padding: "12px",
-    background: "#f9fafb",
+    background: "#f0f9ff",
     borderRadius: "10px",
-    border: "1px solid #e5e7eb",
+    border: "1px solid #bfdbfe",
   },
 
-  // Submit Button
+  link: {
+    color: "#667eea",
+    fontWeight: "600",
+    textDecoration: "underline",
+  },
+
   submitBtn: {
     width: "100%",
     padding: "16px 24px",
@@ -438,7 +587,6 @@ const styles = {
     animation: "spin 0.8s linear infinite",
   },
 
-  // Info Box
   infoBox: {
     marginTop: "32px",
     padding: "20px",
@@ -455,7 +603,6 @@ const styles = {
     lineHeight: "1.8",
   },
 
-  // Responsive
   "@media (max-width: 768px)": {
     nav: {
       flexDirection: "column",
@@ -470,11 +617,6 @@ const styles = {
 
     formCard: {
       padding: "24px",
-      borderRadius: "20px",
-    },
-
-    title: {
-      fontSize: "26px",
     },
 
     container: {
@@ -483,7 +625,6 @@ const styles = {
   },
 };
 
-// Add CSS animations
 if (typeof document !== "undefined") {
   const style = document.createElement("style");
   style.textContent = `
@@ -492,29 +633,10 @@ if (typeof document !== "undefined") {
       100% { transform: rotate(360deg); }
     }
     
-    input:focus {
+    input:focus, select:focus {
       outline: none;
       border-color: #667eea;
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-    }
-    
-    input:disabled {
-      background: #f9fafb;
-      cursor: not-allowed;
-    }
-    
-    button:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
-    }
-    
-    button:active:not(:disabled) {
-      transform: translateY(0);
-    }
-    
-    .submitBtn:hover:not(:disabled) {
-      box-shadow: 0 12px 32px rgba(102, 126, 234, 0.5);
-      transform: translateY(-3px);
     }
   `;
   document.head.appendChild(style);
