@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 export default function BackupPage() {
   const [restoring, setRestoring] = useState(false);
   const [message, setMessage] = useState("");
+  const [menuOpen, setMenuOpen] = useState(false);
  
   async function downloadBackup() {
     try {
@@ -49,14 +51,14 @@ export default function BackupPage() {
 
       if (result.success) {
         setMessage(
-          `✅ Data restored successfully!\n\n` +
+          `✅ Data restored!\n\n` +
           `Orders: ${result.stats.orders}\n` +
           `Employees: ${result.stats.employees}\n` +
-          `Product Types: ${result.stats.productTypes}\n` +
+          `Products: ${result.stats.productTypes}\n` +
           `Logs: ${result.stats.processingLogs}`
         );
       } else {
-        setMessage("⚠️ " + result.message + "\n\nResults: " + JSON.stringify(result.results, null, 2));
+        setMessage("⚠️ " + result.message);
       }
     } catch (error) {
       setMessage("❌ Failed to restore: " + error.message);
@@ -67,25 +69,70 @@ export default function BackupPage() {
 
   return (
     <main style={styles.wrapper}>
+      {/* Compact Mobile Navigation */}
       <nav style={styles.nav}>
-        <div style={styles.navBrand}>
-          <span style={styles.logo}>🖼️</span>
-          <span style={styles.brandText}>What The Frame</span>
+        <div style={styles.navContent}>
+          <div style={styles.navBrand}>
+            <span style={styles.logo}>🖼️</span>
+            <span style={styles.brandText}>What The Frame</span>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button 
+            onClick={() => setMenuOpen(!menuOpen)} 
+            style={styles.menuBtn}
+            aria-label="Toggle menu"
+          >
+            {menuOpen ? "✕" : "☰"}
+          </button>
         </div>
-        <a href="/" style={styles.navBtn}>← Back</a>
+
+        {/* Desktop Navigation */}
+        <div style={styles.navDesktop}>
+          <Link href="/" style={styles.navBtn}>Dashboard</Link>
+          <Link href="/upload" style={styles.navBtn}>+ New Order</Link>
+          <Link href="/analytics" style={styles.navBtn}>📊 Analytics</Link>
+          <Link href="/recent" style={styles.navBtn}>📋 Recent</Link>
+          <Link href="/settings" style={styles.navBtn}>⚙️ Settings</Link>
+          <Link href="/backup" style={{...styles.navBtn, ...styles.navBtnActive}}>🔄 Backup</Link>
+        </div>
+
+        {/* Mobile Dropdown Menu */}
+        {menuOpen && (
+          <div style={styles.mobileMenu}>
+            <Link href="/" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>🏠</span> Dashboard
+            </Link>
+            <Link href="/upload" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>➕</span> New Order
+            </Link>
+            <Link href="/analytics" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>📊</span> Analytics
+            </Link>
+            <Link href="/recent" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>📋</span> Recent Orders
+            </Link>
+            <Link href="/settings" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>⚙️</span> Settings
+            </Link>
+            <Link href="/backup" style={{...styles.mobileMenuItem, ...styles.mobileMenuItemActive}} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>🔄</span> Backup
+            </Link>
+          </div>
+        )}
       </nav>
 
       <div style={styles.container}>
         <div style={styles.card}>
           <h1 style={styles.title}>🔄 Backup & Restore</h1>
           <p style={styles.subtitle}>
-            Use this page to backup your data before deployments and restore it after.
+            Save your data before deployments and restore after.
           </p>
 
           <div style={styles.warning}>
             <span style={styles.warningIcon}>⚠️</span>
-            <div>
-              <strong>Important:</strong> Always create a backup before making code changes or redeploying!
+            <div style={styles.warningText}>
+              <strong>Important:</strong> Always backup before redeploying!
             </div>
           </div>
 
@@ -93,7 +140,7 @@ export default function BackupPage() {
           <div style={styles.section}>
             <h2 style={styles.sectionTitle}>📥 Download Backup</h2>
             <p style={styles.sectionDesc}>
-              Download a JSON file containing all your orders, employees, product types, and logs.
+              Save all orders, employees, products, and logs as JSON.
             </p>
             <button onClick={downloadBackup} style={styles.primaryBtn}>
               ⬇️ Download Backup
@@ -102,9 +149,9 @@ export default function BackupPage() {
 
           {/* Restore Section */}
           <div style={styles.section}>
-            <h2 style={styles.sectionTitle}>📤 Restore from Backup</h2>
+            <h2 style={styles.sectionTitle}>📤 Restore Backup</h2>
             <p style={styles.sectionDesc}>
-              Upload a previously downloaded backup file to restore your data.
+              Upload a backup file to restore your data.
             </p>
             <label style={styles.uploadLabel}>
               <input
@@ -115,7 +162,7 @@ export default function BackupPage() {
                 style={styles.fileInput}
               />
               <span style={styles.uploadBtn}>
-                {restoring ? "⏳ Restoring..." : "📁 Choose Backup File"}
+                {restoring ? "⏳ Restoring..." : "📁 Choose File"}
               </span>
             </label>
           </div>
@@ -129,13 +176,12 @@ export default function BackupPage() {
 
           {/* Instructions */}
           <div style={styles.instructions}>
-            <h3 style={styles.instructionsTitle}>📋 How to Use:</h3>
+            <h3 style={styles.instructionsTitle}>📋 How to Use</h3>
             <ol style={styles.instructionsList}>
-              <li><strong>Before Deployment:</strong> Click "Download Backup" to save your data</li>
-              <li><strong>Make Changes:</strong> Update your code and push to GitHub</li>
-              <li><strong>After Deployment:</strong> Come back here and click "Choose Backup File"</li>
-              <li><strong>Select File:</strong> Choose the JSON file you downloaded in step 1</li>
-              <li><strong>Done!</strong> Your data is restored</li>
+              <li><strong>Before:</strong> Download backup</li>
+              <li><strong>Deploy:</strong> Push code to GitHub</li>
+              <li><strong>After:</strong> Upload backup file</li>
+              <li><strong>Done:</strong> Data restored!</li>
             </ol>
           </div>
         </div>
@@ -148,143 +194,354 @@ const styles = {
   wrapper: {
     minHeight: "100vh",
     background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    paddingBottom: "40px",
   },
+
   nav: {
+    background: "rgba(255, 255, 255, 0.98)",
+    backdropFilter: "blur(10px)",
+    boxShadow: "0 2px 20px rgba(0,0,0,0.1)",
+    position: "sticky",
+    top: 0,
+    zIndex: 100,
+  },
+
+  navContent: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: "20px 40px",
-    background: "rgba(255,255,255,0.1)",
-    backdropFilter: "blur(10px)",
+    padding: "12px 16px",
   },
+
   navBrand: {
     display: "flex",
     alignItems: "center",
-    gap: "12px",
+    gap: "10px",
   },
+
   logo: {
-    fontSize: "32px",
-  },
-  brandText: {
     fontSize: "24px",
-    fontWeight: "800",
-    color: "#fff",
   },
+
+  brandText: {
+    fontSize: "18px",
+    fontWeight: "800",
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    backgroundClip: "text",
+  },
+
+  menuBtn: {
+    fontSize: "24px",
+    background: "none",
+    border: "none",
+    color: "#667eea",
+    cursor: "pointer",
+    padding: "8px",
+    display: "none",
+  },
+
+  navDesktop: {
+    display: "flex",
+    gap: "8px",
+    padding: "0 16px 12px",
+    flexWrap: "wrap",
+  },
+
   navBtn: {
-    padding: "10px 20px",
-    background: "rgba(255,255,255,0.2)",
-    color: "#fff",
+    padding: "8px 16px",
     borderRadius: "10px",
     textDecoration: "none",
-    fontWeight: "700",
+    fontWeight: "600",
+    fontSize: "13px",
+    transition: "all 0.2s",
+    background: "transparent",
+    color: "#1f2937",
+    whiteSpace: "nowrap",
   },
+
+  navBtnActive: {
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    color: "#fff",
+    boxShadow: "0 2px 10px rgba(102, 126, 234, 0.4)",
+  },
+
+  mobileMenu: {
+    background: "#fff",
+    borderTop: "1px solid #e5e7eb",
+  },
+
+  mobileMenuItem: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    padding: "14px 20px",
+    textDecoration: "none",
+    color: "#1f2937",
+    fontWeight: "600",
+    fontSize: "15px",
+    borderBottom: "1px solid #f3f4f6",
+    transition: "background 0.2s",
+  },
+
+  mobileMenuItemActive: {
+    background: "#f0f9ff",
+    color: "#667eea",
+  },
+
+  mobileMenuIcon: {
+    fontSize: "18px",
+    width: "24px",
+    textAlign: "center",
+  },
+
   container: {
-    maxWidth: "800px",
-    margin: "40px auto",
-    padding: "0 20px",
+    maxWidth: "700px",
+    margin: "20px auto",
+    padding: "0 16px",
   },
+
   card: {
     background: "#fff",
-    borderRadius: "20px",
-    padding: "40px",
-    boxShadow: "0 20px 60px rgba(0,0,0,0.3)",
+    borderRadius: "16px",
+    padding: "24px",
+    boxShadow: "0 10px 40px rgba(0,0,0,0.15)",
   },
+
   title: {
-    fontSize: "32px",
-    fontWeight: "800",
-    marginBottom: "10px",
-    color: "#1f2937",
-  },
-  subtitle: {
-    fontSize: "16px",
-    color: "#6b7280",
-    marginBottom: "30px",
-  },
-  warning: {
-    display: "flex",
-    gap: "12px",
-    padding: "16px",
-    background: "#fef3c7",
-    border: "2px solid #fbbf24",
-    borderRadius: "12px",
-    marginBottom: "30px",
-    color: "#92400e",
-  },
-  warningIcon: {
     fontSize: "24px",
-  },
-  section: {
-    marginBottom: "40px",
-    paddingBottom: "40px",
-    borderBottom: "2px solid #e5e7eb",
-  },
-  sectionTitle: {
-    fontSize: "20px",
-    fontWeight: "700",
+    fontWeight: "800",
     marginBottom: "8px",
     color: "#1f2937",
   },
-  sectionDesc: {
+
+  subtitle: {
     fontSize: "14px",
     color: "#6b7280",
     marginBottom: "20px",
+    lineHeight: "1.5",
   },
+
+  warning: {
+    display: "flex",
+    gap: "10px",
+    padding: "12px",
+    background: "#fef3c7",
+    border: "2px solid #fbbf24",
+    borderRadius: "10px",
+    marginBottom: "24px",
+    color: "#92400e",
+    alignItems: "flex-start",
+  },
+
+  warningIcon: {
+    fontSize: "20px",
+    flexShrink: 0,
+  },
+
+  warningText: {
+    fontSize: "13px",
+    lineHeight: "1.5",
+  },
+
+  section: {
+    marginBottom: "24px",
+    paddingBottom: "24px",
+    borderBottom: "2px solid #e5e7eb",
+  },
+
+  sectionTitle: {
+    fontSize: "16px",
+    fontWeight: "700",
+    marginBottom: "6px",
+    color: "#1f2937",
+  },
+
+  sectionDesc: {
+    fontSize: "13px",
+    color: "#6b7280",
+    marginBottom: "16px",
+    lineHeight: "1.5",
+  },
+
   primaryBtn: {
-    padding: "14px 28px",
+    width: "100%",
+    padding: "12px 20px",
     background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
     color: "#fff",
     border: "none",
-    borderRadius: "12px",
-    fontSize: "16px",
+    borderRadius: "10px",
+    fontSize: "14px",
     fontWeight: "700",
     cursor: "pointer",
     boxShadow: "0 4px 12px rgba(102, 126, 234, 0.4)",
+    transition: "all 0.2s",
   },
+
   uploadLabel: {
-    display: "inline-block",
+    display: "block",
     cursor: "pointer",
   },
+
   fileInput: {
     display: "none",
   },
+
   uploadBtn: {
-    display: "inline-block",
-    padding: "14px 28px",
+    display: "block",
+    width: "100%",
+    padding: "12px 20px",
     background: "#10b981",
     color: "#fff",
-    borderRadius: "12px",
-    fontSize: "16px",
+    borderRadius: "10px",
+    fontSize: "14px",
     fontWeight: "700",
     cursor: "pointer",
     boxShadow: "0 4px 12px rgba(16, 185, 129, 0.4)",
+    textAlign: "center",
+    transition: "all 0.2s",
   },
+
   message: {
-    padding: "20px",
+    padding: "16px",
     background: "#f3f4f6",
-    borderRadius: "12px",
-    marginBottom: "30px",
+    borderRadius: "10px",
+    marginBottom: "24px",
   },
+
   messageText: {
-    fontSize: "14px",
+    fontSize: "12px",
     fontFamily: "monospace",
     margin: 0,
     whiteSpace: "pre-wrap",
     color: "#1f2937",
+    lineHeight: "1.6",
   },
+
   instructions: {
     background: "#eff6ff",
-    padding: "20px",
-    borderRadius: "12px",
+    padding: "16px",
+    borderRadius: "10px",
   },
+
   instructionsTitle: {
-    fontSize: "18px",
+    fontSize: "15px",
     fontWeight: "700",
-    marginBottom: "12px",
+    marginBottom: "10px",
     color: "#1e40af",
   },
+
   instructionsList: {
     paddingLeft: "20px",
     margin: 0,
     color: "#1e40af",
+    fontSize: "13px",
+    lineHeight: "1.7",
+  },
+
+  "@media (min-width: 769px)": {
+    container: {
+      margin: "40px auto",
+      padding: "0 20px",
+    },
+    card: {
+      padding: "40px",
+      borderRadius: "20px",
+    },
+    title: {
+      fontSize: "32px",
+      marginBottom: "10px",
+    },
+    subtitle: {
+      fontSize: "16px",
+      marginBottom: "30px",
+    },
+    warning: {
+      padding: "16px",
+      marginBottom: "30px",
+    },
+    warningIcon: {
+      fontSize: "24px",
+    },
+    warningText: {
+      fontSize: "14px",
+    },
+    section: {
+      marginBottom: "40px",
+      paddingBottom: "40px",
+    },
+    sectionTitle: {
+      fontSize: "20px",
+      marginBottom: "8px",
+    },
+    sectionDesc: {
+      fontSize: "14px",
+      marginBottom: "20px",
+    },
+    primaryBtn: {
+      width: "auto",
+      padding: "14px 28px",
+      fontSize: "16px",
+    },
+    uploadBtn: {
+      width: "auto",
+      display: "inline-block",
+      padding: "14px 28px",
+      fontSize: "16px",
+    },
+    message: {
+      padding: "20px",
+      marginBottom: "30px",
+    },
+    messageText: {
+      fontSize: "14px",
+    },
+    instructions: {
+      padding: "20px",
+    },
+    instructionsTitle: {
+      fontSize: "18px",
+      marginBottom: "12px",
+    },
+    instructionsList: {
+      fontSize: "14px",
+    },
+  },
+
+  "@media (max-width: 768px)": {
+    menuBtn: {
+      display: "block",
+    },
+    navDesktop: {
+      display: "none",
+    },
   },
 };
+
+if (typeof document !== "undefined") {
+  const style = document.createElement("style");
+  style.textContent = `
+    @media (hover: hover) {
+      button:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+      }
+
+      .uploadBtn:hover {
+        background: #059669;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+      }
+
+      .mobileMenuItem:hover {
+        background: #f9fafb;
+      }
+    }
+
+    button:active:not(:disabled) {
+      transform: translateY(0);
+    }
+  `;
+  document.head.appendChild(style);
+}
