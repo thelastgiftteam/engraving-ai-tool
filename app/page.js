@@ -8,6 +8,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState("all");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     loadOrders();
@@ -76,41 +77,64 @@ export default function Dashboard() {
 
   return (
     <main style={styles.wrapper}>
-      {/* Top Navigation */}
+      {/* Compact Mobile Navigation */}
       <nav style={styles.nav}>
-        <div style={styles.navBrand}>
-          <span style={styles.logo}>🖼️</span>
-          <span style={styles.brandText}>What The Frame</span>
+        <div style={styles.navContent}>
+          <div style={styles.navBrand}>
+            <span style={styles.logo}>🖼️</span>
+            <span style={styles.brandText}>What The Frame</span>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button 
+            onClick={() => setMenuOpen(!menuOpen)} 
+            style={styles.menuBtn}
+            aria-label="Toggle menu"
+          >
+            {menuOpen ? "✕" : "☰"}
+          </button>
         </div>
 
-        <div style={styles.navRight}>
-          <Link href="/" style={{...styles.navBtn, ...styles.navBtnActive}}>
-            Dashboard
-          </Link>
-
-          <Link href="/upload" style={styles.navBtn}>
-            + New Order
-          </Link>
-
-          <Link href="/analytics" style={styles.navBtn}>
-            📊 Analytics
-          </Link>
-
-          <Link href="/recent" style={styles.navBtn}>
-            📋 Recent
-          </Link>
-
-          <Link href="/settings" style={styles.navBtn}>
-            ⚙️ Settings
-          </Link>
+        {/* Desktop Navigation */}
+        <div style={styles.navDesktop}>
+          <Link href="/" style={{...styles.navBtn, ...styles.navBtnActive}}>Dashboard</Link>
+          <Link href="/upload" style={styles.navBtn}>+ New Order</Link>
+          <Link href="/analytics" style={styles.navBtn}>📊 Analytics</Link>
+          <Link href="/recent" style={styles.navBtn}>📋 Recent</Link>
+          <Link href="/settings" style={styles.navBtn}>⚙️ Settings</Link>
+          <Link href="/backup" style={styles.navBtn}>🔄 Backup</Link>
         </div>
+
+        {/* Mobile Dropdown Menu */}
+        {menuOpen && (
+          <div style={styles.mobileMenu}>
+            <Link href="/" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>🏠</span> Dashboard
+            </Link>
+            <Link href="/upload" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>➕</span> New Order
+            </Link>
+            <Link href="/analytics" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>📊</span> Analytics
+            </Link>
+            <Link href="/recent" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>📋</span> Recent Orders
+            </Link>
+            <Link href="/settings" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>⚙️</span> Settings
+            </Link>
+            <Link href="/backup" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>🔄</span> Backup
+            </Link>
+          </div>
+        )}
       </nav>
 
-      {/* Stats Bar */}
+      {/* Compact Stats - 2x2 Grid on Mobile */}
       <div style={styles.statsBar}>
         <div style={styles.statCard}>
           <div style={styles.statNumber}>{stats.total}</div>
-          <div style={styles.statLabel}>Total Orders</div>
+          <div style={styles.statLabel}>Total</div>
         </div>
 
         <div style={styles.statCard}>
@@ -129,21 +153,44 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Filter Tabs */}
+      {/* Compact Filter Tabs */}
       <div style={styles.filterBar}>
-        {["all", "pending", "processing", "completed"].map(f => (
-          <button
-            key={f}
-            onClick={() => setFilter(f)}
-            style={{
-              ...styles.filterBtn,
-              ...(filter === f ? styles.filterBtnActive : {})
-            }}
-          >
-            {f.charAt(0).toUpperCase() + f.slice(1)}
-            {f !== "all" && ` (${stats[f]})`}
-          </button>
-        ))}
+        <button
+          onClick={() => setFilter("all")}
+          style={{
+            ...styles.filterBtn,
+            ...(filter === "all" ? styles.filterBtnActive : {})
+          }}
+        >
+          All
+        </button>
+        <button
+          onClick={() => setFilter("pending")}
+          style={{
+            ...styles.filterBtn,
+            ...(filter === "pending" ? styles.filterBtnActive : {})
+          }}
+        >
+          Pending ({stats.pending})
+        </button>
+        <button
+          onClick={() => setFilter("processing")}
+          style={{
+            ...styles.filterBtn,
+            ...(filter === "processing" ? styles.filterBtnActive : {})
+          }}
+        >
+          Processing ({stats.processing})
+        </button>
+        <button
+          onClick={() => setFilter("completed")}
+          style={{
+            ...styles.filterBtn,
+            ...(filter === "completed" ? styles.filterBtnActive : {})
+          }}
+        >
+          Completed ({stats.completed})
+        </button>
       </div>
 
       {/* Orders Grid */}
@@ -172,23 +219,18 @@ export default function Dashboard() {
 
             return (
               <Link key={order.uid} href={`/order/${order.uid}`} style={styles.card}>
-                {/* Image Preview */}
+                {/* Compact Image Preview */}
                 {order.images && order.images.length > 0 && (
                   <div style={styles.imagePreview}>
-                    {order.images.slice(0, 3).map((img, idx) => (
-                      <div 
-                        key={idx} 
-                        style={{
-                          ...styles.previewImg,
-                          backgroundImage: `url(${img.thumbnail || img.url})`,
-                          zIndex: 3 - idx,
-                          left: idx * 12 + 'px',
-                        }}
-                      />
-                    ))}
-                    {order.images.length > 3 && (
-                      <div style={styles.moreImages}>
-                        +{order.images.length - 3}
+                    <div 
+                      style={{
+                        ...styles.previewImg,
+                        backgroundImage: `url(${order.images[0].thumbnail || order.images[0].url})`
+                      }}
+                    />
+                    {order.images.length > 1 && (
+                      <div style={styles.imageCount}>
+                        +{order.images.length - 1}
                       </div>
                     )}
                   </div>
@@ -209,23 +251,19 @@ export default function Dashboard() {
 
                   <div style={styles.orderMeta}>
                     <span style={styles.metaItem}>
-                      🖼️ {order.images?.length || 0} images
-                    </span>
-                    <span style={styles.metaItem}>
-                      📅 {formatDate(order.createdAt)}
+                      🖼️ {order.images?.length || 0} • 📅 {formatDate(order.createdAt)}
                     </span>
                     {order.designer && (
                       <span style={styles.metaItem}>
                         ✏️ {order.designer}
                       </span>
                     )}
+                    {order.status === "processing" && order.teamMember && (
+                      <span style={styles.metaItem}>
+                        👤 {order.teamMember}
+                      </span>
+                    )}
                   </div>
-
-                  {order.status === "processing" && order.teamMember && (
-                    <div style={styles.teamInfo}>
-                      👤 {order.teamMember}
-                    </div>
-                  )}
                 </div>
 
                 <div style={styles.cardArrow}>→</div>
@@ -235,31 +273,18 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Refresh Button - Fixed at bottom */}
-      <div style={styles.refreshContainer}>
-        <button 
-          onClick={handleRefresh} 
-          disabled={refreshing}
-          style={{
-            ...styles.refreshBtn,
-            ...(refreshing ? styles.refreshBtnLoading : {})
-          }}
-        >
-          {refreshing ? (
-            <>
-              <span style={styles.refreshSpinner}></span>
-              Refreshing...
-            </>
-          ) : (
-            <>
-              🔄 Refresh Dashboard
-            </>
-          )}
-        </button>
-        <p style={styles.refreshHint}>
-          💡 Click to manually refresh and see latest orders
-        </p>
-      </div>
+      {/* Floating Refresh Button - Non-blocking */}
+      <button 
+        onClick={handleRefresh} 
+        disabled={refreshing}
+        style={{
+          ...styles.floatingRefresh,
+          ...(refreshing ? styles.floatingRefreshLoading : {})
+        }}
+        title="Refresh dashboard"
+      >
+        {refreshing ? "⏳" : "🔄"}
+      </button>
     </main>
   );
 }
@@ -288,34 +313,37 @@ const styles = {
   wrapper: {
     minHeight: "100vh",
     background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-    padding: "0 0 120px 0",
+    paddingBottom: "80px",
   },
 
   nav: {
-    background: "rgba(255, 255, 255, 0.95)",
+    background: "rgba(255, 255, 255, 0.98)",
     backdropFilter: "blur(10px)",
-    padding: "16px 24px",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
     boxShadow: "0 2px 20px rgba(0,0,0,0.1)",
     position: "sticky",
     top: 0,
     zIndex: 100,
   },
 
+  navContent: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "12px 16px",
+  },
+
   navBrand: {
     display: "flex",
     alignItems: "center",
-    gap: "12px",
+    gap: "10px",
   },
 
   logo: {
-    fontSize: "28px",
+    fontSize: "24px",
   },
 
   brandText: {
-    fontSize: "20px",
+    fontSize: "18px",
     fontWeight: "800",
     background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
     WebkitBackgroundClip: "text",
@@ -323,172 +351,203 @@ const styles = {
     backgroundClip: "text",
   },
 
-  navRight: {
+  menuBtn: {
+    fontSize: "24px",
+    background: "none",
+    border: "none",
+    color: "#667eea",
+    cursor: "pointer",
+    padding: "8px",
+    display: "none",
+  },
+
+  navDesktop: {
     display: "flex",
-    gap: "12px",
+    gap: "8px",
+    padding: "0 16px 12px",
     flexWrap: "wrap",
   },
 
   navBtn: {
-    padding: "10px 20px",
-    borderRadius: "12px",
+    padding: "8px 16px",
+    borderRadius: "10px",
     textDecoration: "none",
     fontWeight: "600",
-    fontSize: "14px",
+    fontSize: "13px",
     transition: "all 0.2s",
     background: "transparent",
     color: "#1f2937",
-    border: "none",
-    cursor: "pointer",
+    whiteSpace: "nowrap",
   },
 
   navBtnActive: {
     background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
     color: "#fff",
-    boxShadow: "0 4px 15px rgba(102, 126, 234, 0.4)",
+    boxShadow: "0 2px 10px rgba(102, 126, 234, 0.4)",
+  },
+
+  mobileMenu: {
+    background: "#fff",
+    borderTop: "1px solid #e5e7eb",
+  },
+
+  mobileMenuItem: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    padding: "14px 20px",
+    textDecoration: "none",
+    color: "#1f2937",
+    fontWeight: "600",
+    fontSize: "15px",
+    borderBottom: "1px solid #f3f4f6",
+    transition: "background 0.2s",
+  },
+
+  mobileMenuIcon: {
+    fontSize: "18px",
+    width: "24px",
+    textAlign: "center",
   },
 
   statsBar: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
-    gap: "16px",
+    gridTemplateColumns: "repeat(2, 1fr)",
+    gap: "12px",
     maxWidth: "1200px",
-    margin: "30px auto 0",
-    padding: "0 24px",
+    margin: "16px auto 0",
+    padding: "0 16px",
   },
 
   statCard: {
-    background: "rgba(255, 255, 255, 0.95)",
+    background: "rgba(255, 255, 255, 0.98)",
     backdropFilter: "blur(10px)",
-    padding: "20px",
-    borderRadius: "16px",
+    padding: "16px",
+    borderRadius: "14px",
     textAlign: "center",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+    boxShadow: "0 2px 15px rgba(0,0,0,0.08)",
   },
 
   statNumber: {
-    fontSize: "32px",
+    fontSize: "28px",
     fontWeight: "800",
     color: "#1f2937",
-    marginBottom: "4px",
+    marginBottom: "2px",
   },
 
   statLabel: {
-    fontSize: "13px",
+    fontSize: "11px",
     color: "#6b7280",
-    fontWeight: "600",
+    fontWeight: "700",
     textTransform: "uppercase",
     letterSpacing: "0.5px",
   },
 
   filterBar: {
-    display: "flex",
-    gap: "12px",
+    display: "grid",
+    gridTemplateColumns: "repeat(2, 1fr)",
+    gap: "10px",
     maxWidth: "1200px",
-    margin: "24px auto 0",
-    padding: "0 24px",
-    flexWrap: "wrap",
+    margin: "16px auto 0",
+    padding: "0 16px",
   },
 
   filterBtn: {
-    padding: "10px 20px",
-    borderRadius: "12px",
-    border: "2px solid rgba(255,255,255,0.3)",
-    background: "rgba(255, 255, 255, 0.2)",
+    padding: "10px 12px",
+    borderRadius: "10px",
+    border: "2px solid rgba(255,255,255,0.4)",
+    background: "rgba(255, 255, 255, 0.25)",
     backdropFilter: "blur(10px)",
     color: "#fff",
     fontWeight: "600",
-    fontSize: "14px",
+    fontSize: "12px",
     cursor: "pointer",
     transition: "all 0.2s",
+    whiteSpace: "nowrap",
   },
 
   filterBtnActive: {
-    background: "rgba(255, 255, 255, 0.95)",
+    background: "rgba(255, 255, 255, 0.98)",
     color: "#667eea",
-    borderColor: "rgba(255,255,255,0.95)",
-    boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
+    borderColor: "rgba(255,255,255,0.98)",
+    boxShadow: "0 2px 12px rgba(0,0,0,0.15)",
   },
 
   grid: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-    gap: "20px",
+    gridTemplateColumns: "1fr",
+    gap: "16px",
     maxWidth: "1200px",
-    margin: "24px auto 0",
-    padding: "0 24px",
+    margin: "16px auto 0",
+    padding: "0 16px",
   },
 
   card: {
     background: "#fff",
-    borderRadius: "20px",
-    padding: "20px",
+    borderRadius: "16px",
+    padding: "14px",
     textDecoration: "none",
     color: "#000",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-    transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-    cursor: "pointer",
+    boxShadow: "0 2px 15px rgba(0,0,0,0.08)",
+    transition: "all 0.3s",
+    display: "flex",
+    gap: "12px",
     position: "relative",
-    overflow: "hidden",
   },
 
   imagePreview: {
-    position: "relative",
-    height: "180px",
-    marginBottom: "16px",
-    borderRadius: "12px",
+    width: "80px",
+    height: "80px",
+    borderRadius: "10px",
     overflow: "hidden",
+    flexShrink: 0,
+    position: "relative",
   },
 
   previewImg: {
-    position: "absolute",
-    top: 0,
-    width: "calc(100% - 24px)",
+    width: "100%",
     height: "100%",
     backgroundSize: "cover",
     backgroundPosition: "center",
-    borderRadius: "12px",
-    border: "3px solid #fff",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-    transition: "all 0.3s",
+    backgroundColor: "#f3f4f6",
   },
 
-  moreImages: {
+  imageCount: {
     position: "absolute",
-    right: "16px",
-    bottom: "16px",
+    bottom: "6px",
+    right: "6px",
     background: "rgba(0,0,0,0.75)",
     color: "#fff",
-    padding: "6px 12px",
-    borderRadius: "20px",
-    fontSize: "12px",
+    padding: "3px 8px",
+    borderRadius: "12px",
+    fontSize: "10px",
     fontWeight: "700",
-    zIndex: 10,
   },
 
   cardContent: {
-    position: "relative",
-    zIndex: 1,
+    flex: 1,
+    minWidth: 0,
   },
 
   orderHeader: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: "12px",
-    gap: "12px",
+    marginBottom: "8px",
+    gap: "8px",
   },
 
   orderNumber: {
-    fontSize: "20px",
+    fontSize: "16px",
     fontWeight: "800",
     color: "#1f2937",
+    whiteSpace: "nowrap",
   },
 
   statusBadge: {
-    padding: "6px 12px",
-    borderRadius: "20px",
-    fontSize: "12px",
+    padding: "4px 10px",
+    borderRadius: "12px",
+    fontSize: "10px",
     fontWeight: "700",
     whiteSpace: "nowrap",
   },
@@ -496,32 +555,19 @@ const styles = {
   orderMeta: {
     display: "flex",
     flexDirection: "column",
-    gap: "8px",
-    marginBottom: "12px",
+    gap: "6px",
   },
 
   metaItem: {
-    fontSize: "14px",
+    fontSize: "12px",
     color: "#6b7280",
     fontWeight: "500",
   },
 
-  teamInfo: {
-    padding: "10px",
-    background: "#f3f4f6",
-    borderRadius: "10px",
-    fontSize: "14px",
-    fontWeight: "600",
-    color: "#374151",
-  },
-
   cardArrow: {
-    position: "absolute",
-    right: "20px",
-    top: "50%",
-    transform: "translateY(-50%)",
-    fontSize: "24px",
+    fontSize: "20px",
     color: "#d1d5db",
+    alignSelf: "center",
     opacity: 0,
     transition: "all 0.3s",
   },
@@ -531,133 +577,119 @@ const styles = {
     margin: "60px auto",
     textAlign: "center",
     color: "#fff",
+    padding: "0 16px",
   },
 
   spinner: {
-    width: "50px",
-    height: "50px",
-    border: "4px solid rgba(255,255,255,0.3)",
-    borderTop: "4px solid #fff",
+    width: "40px",
+    height: "40px",
+    border: "3px solid rgba(255,255,255,0.3)",
+    borderTop: "3px solid #fff",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
-    margin: "0 auto 20px",
+    margin: "0 auto 16px",
   },
 
   emptyState: {
     maxWidth: "400px",
-    margin: "80px auto",
+    margin: "60px auto",
     textAlign: "center",
     color: "#fff",
-    padding: "40px",
-    background: "rgba(255,255,255,0.1)",
+    padding: "32px 16px",
+    background: "rgba(255,255,255,0.15)",
     backdropFilter: "blur(10px)",
-    borderRadius: "24px",
-    border: "2px solid rgba(255,255,255,0.2)",
+    borderRadius: "20px",
+    border: "2px solid rgba(255,255,255,0.25)",
   },
 
   emptyIcon: {
-    fontSize: "64px",
-    marginBottom: "20px",
+    fontSize: "48px",
+    marginBottom: "16px",
   },
 
   emptyTitle: {
-    fontSize: "24px",
+    fontSize: "20px",
     fontWeight: "800",
-    marginBottom: "12px",
+    marginBottom: "8px",
   },
 
   emptyText: {
-    fontSize: "16px",
+    fontSize: "14px",
     opacity: 0.9,
-    marginBottom: "24px",
-    lineHeight: "1.6",
+    marginBottom: "20px",
+    lineHeight: "1.5",
   },
 
   emptyBtn: {
     display: "inline-block",
-    padding: "14px 28px",
+    padding: "12px 24px",
     background: "#fff",
     color: "#667eea",
-    borderRadius: "12px",
+    borderRadius: "10px",
     textDecoration: "none",
     fontWeight: "700",
-    fontSize: "16px",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.2)",
-    transition: "all 0.2s",
+    fontSize: "14px",
+    boxShadow: "0 4px 15px rgba(0,0,0,0.15)",
   },
 
-  // Refresh Button - Fixed at bottom
-  refreshContainer: {
+  floatingRefresh: {
     position: "fixed",
-    bottom: "24px",
-    left: "50%",
-    transform: "translateX(-50%)",
-    zIndex: 50,
-    textAlign: "center",
-  },
-
-  refreshBtn: {
-    padding: "16px 32px",
-    background: "rgba(255, 255, 255, 0.95)",
-    backdropFilter: "blur(10px)",
-    color: "#667eea",
-    border: "3px solid #667eea",
-    borderRadius: "50px",
-    fontSize: "16px",
-    fontWeight: "800",
+    bottom: "20px",
+    right: "20px",
+    width: "56px",
+    height: "56px",
+    borderRadius: "50%",
+    background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+    color: "#fff",
+    border: "none",
+    fontSize: "24px",
     cursor: "pointer",
-    boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
+    boxShadow: "0 4px 20px rgba(102, 126, 234, 0.5)",
     transition: "all 0.3s",
+    zIndex: 50,
     display: "flex",
     alignItems: "center",
-    gap: "10px",
+    justifyContent: "center",
   },
 
-  refreshBtnLoading: {
+  floatingRefreshLoading: {
     opacity: 0.7,
     cursor: "not-allowed",
   },
 
-  refreshSpinner: {
-    width: "18px",
-    height: "18px",
-    border: "3px solid rgba(102, 126, 234, 0.3)",
-    borderTop: "3px solid #667eea",
-    borderRadius: "50%",
-    animation: "spin 0.8s linear infinite",
-  },
-
-  refreshHint: {
-    marginTop: "8px",
-    fontSize: "12px",
-    color: "rgba(255,255,255,0.9)",
-    fontWeight: "600",
+  "@media (min-width: 769px)": {
+    statsBar: {
+      gridTemplateColumns: "repeat(4, 1fr)",
+      gap: "16px",
+    },
+    filterBar: {
+      display: "flex",
+      gap: "12px",
+    },
+    grid: {
+      gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
+      gap: "20px",
+    },
+    card: {
+      flexDirection: "column",
+    },
+    imagePreview: {
+      width: "100%",
+      height: "140px",
+    },
   },
 
   "@media (max-width: 768px)": {
-    nav: {
-      flexDirection: "column",
-      gap: "16px",
-      padding: "16px",
+    menuBtn: {
+      display: "block",
     },
-    
-    navRight: {
-      width: "100%",
-      justifyContent: "center",
-    },
-    
-    grid: {
-      gridTemplateColumns: "1fr",
-      padding: "0 16px",
-    },
-    
-    statsBar: {
-      gridTemplateColumns: "repeat(2, 1fr)",
-      padding: "0 16px",
+    navDesktop: {
+      display: "none",
     },
   },
 };
 
+// Add animations
 if (typeof document !== "undefined") {
   const style = document.createElement("style");
   style.textContent = `
@@ -666,23 +698,34 @@ if (typeof document !== "undefined") {
       100% { transform: rotate(360deg); }
     }
     
-    .card:hover {
-      transform: translateY(-8px);
-      box-shadow: 0 12px 40px rgba(0,0,0,0.2);
-    }
-    
-    .card:hover .cardArrow {
-      opacity: 1;
-      transform: translateY(-50%) translateX(4px);
-    }
-    
-    .card:hover .previewImg {
-      transform: scale(1.05);
-    }
+    @media (hover: hover) {
+      .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+      }
+      
+      .card:hover .cardArrow {
+        opacity: 1;
+        transform: translateX(4px);
+      }
 
-    .refreshBtn:hover:not(:disabled) {
-      transform: scale(1.05);
-      box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4);
+      .floatingRefresh:hover:not(:disabled) {
+        transform: scale(1.1);
+        box-shadow: 0 6px 30px rgba(102, 126, 234, 0.6);
+      }
+
+      .mobileMenuItem:hover {
+        background: #f9fafb;
+      }
+
+      .emptyBtn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+      }
+    }
+    
+    .floatingRefresh:active:not(:disabled) {
+      transform: scale(0.95);
     }
   `;
   document.head.appendChild(style);
