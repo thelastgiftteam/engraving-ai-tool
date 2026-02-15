@@ -7,6 +7,7 @@ export default function AnalyticsPage() {
   const [analytics, setAnalytics] = useState({ teamStats: [] });
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState("week");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     loadAnalytics();
@@ -37,40 +38,63 @@ export default function AnalyticsPage() {
 
   return (
     <main style={styles.wrapper}>
-      {/* Top Navigation */}
+      {/* Compact Mobile Navigation */}
       <nav style={styles.nav}>
-        <div style={styles.navBrand}>
-          <span style={styles.logo}>🖼️</span>
-          <span style={styles.brandText}>What The Frame</span>
+        <div style={styles.navContent}>
+          <div style={styles.navBrand}>
+            <span style={styles.logo}>🖼️</span>
+            <span style={styles.brandText}>What The Frame</span>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button 
+            onClick={() => setMenuOpen(!menuOpen)} 
+            style={styles.menuBtn}
+            aria-label="Toggle menu"
+          >
+            {menuOpen ? "✕" : "☰"}
+          </button>
         </div>
 
-        <div style={styles.navRight}>
-          <Link href="/" style={styles.navBtn}>
-            Dashboard
-          </Link>
-
-          <Link href="/upload" style={styles.navBtn}>
-            + New Order
-          </Link>
-
-          <Link href="/analytics" style={{...styles.navBtn, ...styles.navBtnActive}}>
-            📊 Analytics
-          </Link>
-
-          <Link href="/recent" style={styles.navBtn}>
-            📋 Recent
-          </Link>
-
-          <Link href="/settings" style={styles.navBtn}>
-            ⚙️ Settings
-          </Link>
+        {/* Desktop Navigation */}
+        <div style={styles.navDesktop}>
+          <Link href="/" style={styles.navBtn}>Dashboard</Link>
+          <Link href="/upload" style={styles.navBtn}>+ New Order</Link>
+          <Link href="/analytics" style={{...styles.navBtn, ...styles.navBtnActive}}>📊 Analytics</Link>
+          <Link href="/recent" style={styles.navBtn}>📋 Recent</Link>
+          <Link href="/settings" style={styles.navBtn}>⚙️ Settings</Link>
+          <Link href="/backup" style={styles.navBtn}>🔄 Backup</Link>
         </div>
+
+        {/* Mobile Dropdown Menu */}
+        {menuOpen && (
+          <div style={styles.mobileMenu}>
+            <Link href="/" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>🏠</span> Dashboard
+            </Link>
+            <Link href="/upload" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>➕</span> New Order
+            </Link>
+            <Link href="/analytics" style={{...styles.mobileMenuItem, ...styles.mobileMenuItemActive}} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>📊</span> Analytics
+            </Link>
+            <Link href="/recent" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>📋</span> Recent Orders
+            </Link>
+            <Link href="/settings" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>⚙️</span> Settings
+            </Link>
+            <Link href="/backup" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>🔄</span> Backup
+            </Link>
+          </div>
+        )}
       </nav>
 
       <div style={styles.container}>
-        <h1 style={styles.pageTitle}>Team Performance Analytics</h1>
+        <h1 style={styles.pageTitle}>Team Analytics</h1>
 
-        {/* Period Filter */}
+        {/* Period Filter - 2x2 Grid on Mobile */}
         <div style={styles.periodFilter}>
           <button
             onClick={() => setPeriod("day")}
@@ -117,24 +141,24 @@ export default function AnalyticsPage() {
           </div>
         ) : (
           <>
-            {/* Summary Cards */}
+            {/* Summary Cards - Compact on Mobile */}
             <div style={styles.summaryCards}>
               <div style={styles.summaryCard}>
                 <div style={styles.summaryIcon}>✅</div>
                 <div style={styles.summaryNumber}>{totalOrders}</div>
-                <div style={styles.summaryLabel}>Orders Completed</div>
+                <div style={styles.summaryLabel}>Completed</div>
               </div>
 
               <div style={styles.summaryCard}>
                 <div style={styles.summaryIcon}>⏱️</div>
                 <div style={styles.summaryNumber}>{avgProcessingTime}m</div>
-                <div style={styles.summaryLabel}>Avg Processing Time</div>
+                <div style={styles.summaryLabel}>Avg Time</div>
               </div>
 
               <div style={styles.summaryCard}>
                 <div style={styles.summaryIcon}>👥</div>
                 <div style={styles.summaryNumber}>{analytics.teamStats.length}</div>
-                <div style={styles.summaryLabel}>Active Team Members</div>
+                <div style={styles.summaryLabel}>Team Members</div>
               </div>
             </div>
 
@@ -157,11 +181,11 @@ export default function AnalyticsPage() {
                   <table style={styles.table}>
                     <thead>
                       <tr style={styles.tableHeaderRow}>
-                        <th style={styles.tableHeader}>Rank</th>
-                        <th style={styles.tableHeader}>Team Member</th>
-                        <th style={styles.tableHeader}>Orders Completed</th>
-                        <th style={styles.tableHeader}>Avg Time</th>
-                        <th style={styles.tableHeader}>Performance</th>
+                        <th style={styles.tableHeader}>#</th>
+                        <th style={styles.tableHeader}>Member</th>
+                        <th style={styles.tableHeader}>Orders</th>
+                        <th style={styles.tableHeader}>Avg</th>
+                        <th style={styles.tableHeader}>%</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -174,7 +198,7 @@ export default function AnalyticsPage() {
                           <tr key={stat.name} style={styles.tableRow}>
                             <td style={styles.tableCell}>
                               <div style={styles.rankBadge}>
-                                {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `#${index + 1}`}
+                                {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : `${index + 1}`}
                               </div>
                             </td>
                             <td style={styles.tableCell}>
@@ -187,15 +211,17 @@ export default function AnalyticsPage() {
                               <span style={styles.timeValue}>{Math.round(stat.avg_processing_minutes)}m</span>
                             </td>
                             <td style={styles.tableCell}>
-                              <div style={styles.performanceBar}>
-                                <div 
-                                  style={{
-                                    ...styles.performanceFill,
-                                    width: `${performanceScore}%`
-                                  }}
-                                />
+                              <div style={styles.performanceContainer}>
+                                <div style={styles.performanceBar}>
+                                  <div 
+                                    style={{
+                                      ...styles.performanceFill,
+                                      width: `${performanceScore}%`
+                                    }}
+                                  />
+                                </div>
+                                <span style={styles.performanceText}>{Math.round(performanceScore)}%</span>
                               </div>
-                              <span style={styles.performanceText}>{Math.round(performanceScore)}%</span>
                             </td>
                           </tr>
                         );
@@ -206,39 +232,38 @@ export default function AnalyticsPage() {
               )}
             </div>
 
-            {/* Insights */}
+            {/* Insights - Compact */}
             <div style={styles.insightsCard}>
               <h3 style={styles.insightsTitle}>💡 Insights</h3>
               <ul style={styles.insightsList}>
                 {analytics.teamStats.length > 0 && (
                   <>
                     <li>
-                      <strong>{analytics.teamStats[0]?.name}</strong> is the top performer with{" "}
-                      <strong>{analytics.teamStats[0]?.completed_orders} orders</strong> completed
+                      <strong>{analytics.teamStats[0]?.name}</strong> leads with{" "}
+                      <strong>{analytics.teamStats[0]?.completed_orders} orders</strong>
                     </li>
                     <li>
-                      Average processing time is <strong>{avgProcessingTime} minutes</strong> per order
+                      Average time: <strong>{avgProcessingTime} minutes</strong>
                     </li>
                     <li>
-                      Total team output: <strong>{totalOrders} orders</strong> in this period
+                      Total output: <strong>{totalOrders} orders</strong>
                     </li>
                   </>
                 )}
                 {analytics.teamStats.length === 0 && (
-                  <li>Start completing orders to see performance insights</li>
+                  <li>Start completing orders to see insights</li>
                 )}
               </ul>
             </div>
 
-            {/* Export Info */}
+            {/* Export Info - Compact */}
             <div style={styles.infoBox}>
-              <strong>📤 Google Sheets Export</strong>
+              <strong style={styles.infoTitle}>📤 Google Sheets Export</strong>
               <p style={styles.infoText}>
-                All processing data (employee, order, start time, end time, duration, product type) 
-                is automatically logged and ready for Google Sheets export for incentive calculation.
+                All data auto-logs to Google Sheets for incentive calculation.
               </p>
               <Link href="/recent" style={styles.viewLogsBtn}>
-                View Processing Logs →
+                View Logs →
               </Link>
             </div>
           </>
@@ -256,30 +281,33 @@ const styles = {
   },
 
   nav: {
-    background: "rgba(255, 255, 255, 0.95)",
+    background: "rgba(255, 255, 255, 0.98)",
     backdropFilter: "blur(10px)",
-    padding: "16px 24px",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
     boxShadow: "0 2px 20px rgba(0,0,0,0.1)",
     position: "sticky",
     top: 0,
     zIndex: 100,
   },
 
+  navContent: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "12px 16px",
+  },
+
   navBrand: {
     display: "flex",
     alignItems: "center",
-    gap: "12px",
+    gap: "10px",
   },
 
   logo: {
-    fontSize: "28px",
+    fontSize: "24px",
   },
 
   brandText: {
-    fontSize: "20px",
+    fontSize: "18px",
     fontWeight: "800",
     background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
     WebkitBackgroundClip: "text",
@@ -287,68 +315,108 @@ const styles = {
     backgroundClip: "text",
   },
 
-  navRight: {
+  menuBtn: {
+    fontSize: "24px",
+    background: "none",
+    border: "none",
+    color: "#667eea",
+    cursor: "pointer",
+    padding: "8px",
+    display: "none",
+  },
+
+  navDesktop: {
     display: "flex",
-    gap: "12px",
+    gap: "8px",
+    padding: "0 16px 12px",
     flexWrap: "wrap",
   },
 
   navBtn: {
-    padding: "10px 20px",
-    borderRadius: "12px",
+    padding: "8px 16px",
+    borderRadius: "10px",
     textDecoration: "none",
     fontWeight: "600",
-    fontSize: "14px",
+    fontSize: "13px",
     transition: "all 0.2s",
     background: "transparent",
     color: "#1f2937",
+    whiteSpace: "nowrap",
   },
 
   navBtnActive: {
     background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
     color: "#fff",
-    boxShadow: "0 4px 15px rgba(102, 126, 234, 0.4)",
+    boxShadow: "0 2px 10px rgba(102, 126, 234, 0.4)",
+  },
+
+  mobileMenu: {
+    background: "#fff",
+    borderTop: "1px solid #e5e7eb",
+  },
+
+  mobileMenuItem: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    padding: "14px 20px",
+    textDecoration: "none",
+    color: "#1f2937",
+    fontWeight: "600",
+    fontSize: "15px",
+    borderBottom: "1px solid #f3f4f6",
+    transition: "background 0.2s",
+  },
+
+  mobileMenuItemActive: {
+    background: "#f0f9ff",
+    color: "#667eea",
+  },
+
+  mobileMenuIcon: {
+    fontSize: "18px",
+    width: "24px",
+    textAlign: "center",
   },
 
   container: {
     maxWidth: "1200px",
-    margin: "30px auto 0",
-    padding: "0 24px",
+    margin: "20px auto 0",
+    padding: "0 16px",
   },
 
   pageTitle: {
-    fontSize: "36px",
+    fontSize: "24px",
     fontWeight: "800",
     color: "#fff",
     textAlign: "center",
-    marginBottom: "30px",
+    marginBottom: "20px",
   },
 
   periodFilter: {
-    display: "flex",
-    gap: "12px",
-    justifyContent: "center",
-    marginBottom: "30px",
-    flexWrap: "wrap",
+    display: "grid",
+    gridTemplateColumns: "repeat(2, 1fr)",
+    gap: "10px",
+    marginBottom: "20px",
   },
 
   periodBtn: {
-    padding: "12px 24px",
-    background: "rgba(255, 255, 255, 0.2)",
+    padding: "10px 16px",
+    background: "rgba(255, 255, 255, 0.25)",
     backdropFilter: "blur(10px)",
     color: "#fff",
-    border: "2px solid rgba(255,255,255,0.3)",
-    borderRadius: "12px",
-    fontSize: "15px",
+    border: "2px solid rgba(255,255,255,0.4)",
+    borderRadius: "10px",
+    fontSize: "13px",
     fontWeight: "700",
     cursor: "pointer",
     transition: "all 0.2s",
   },
 
   periodBtnActive: {
-    background: "rgba(255, 255, 255, 0.95)",
+    background: "rgba(255, 255, 255, 0.98)",
     color: "#667eea",
-    borderColor: "rgba(255,255,255,0.95)",
+    borderColor: "rgba(255,255,255,0.98)",
   },
 
   loadingState: {
@@ -358,63 +426,63 @@ const styles = {
   },
 
   spinner: {
-    width: "50px",
-    height: "50px",
-    border: "4px solid rgba(255,255,255,0.3)",
-    borderTop: "4px solid #fff",
+    width: "40px",
+    height: "40px",
+    border: "3px solid rgba(255,255,255,0.3)",
+    borderTop: "3px solid #fff",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
-    margin: "0 auto 20px",
+    margin: "0 auto 16px",
   },
 
   summaryCards: {
     display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-    gap: "20px",
-    marginBottom: "30px",
+    gridTemplateColumns: "repeat(3, 1fr)",
+    gap: "12px",
+    marginBottom: "20px",
   },
 
   summaryCard: {
-    background: "rgba(255, 255, 255, 0.95)",
-    borderRadius: "20px",
-    padding: "30px",
+    background: "rgba(255, 255, 255, 0.98)",
+    borderRadius: "14px",
+    padding: "16px 12px",
     textAlign: "center",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+    boxShadow: "0 2px 15px rgba(0,0,0,0.08)",
   },
 
   summaryIcon: {
-    fontSize: "40px",
-    marginBottom: "12px",
-  },
-
-  summaryNumber: {
-    fontSize: "36px",
-    fontWeight: "800",
-    color: "#1f2937",
+    fontSize: "28px",
     marginBottom: "8px",
   },
 
+  summaryNumber: {
+    fontSize: "24px",
+    fontWeight: "800",
+    color: "#1f2937",
+    marginBottom: "4px",
+  },
+
   summaryLabel: {
-    fontSize: "14px",
+    fontSize: "10px",
     color: "#6b7280",
-    fontWeight: "600",
+    fontWeight: "700",
     textTransform: "uppercase",
     letterSpacing: "0.5px",
   },
 
   section: {
     background: "#fff",
-    borderRadius: "20px",
-    padding: "30px",
-    marginBottom: "24px",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+    borderRadius: "16px",
+    padding: "20px",
+    marginBottom: "16px",
+    boxShadow: "0 2px 15px rgba(0,0,0,0.08)",
   },
 
   sectionTitle: {
-    fontSize: "24px",
+    fontSize: "18px",
     fontWeight: "800",
     color: "#1f2937",
-    marginBottom: "24px",
+    marginBottom: "16px",
   },
 
   tableContainer: {
@@ -431,13 +499,13 @@ const styles = {
   },
 
   tableHeader: {
-    padding: "16px",
+    padding: "10px 8px",
     textAlign: "left",
-    fontSize: "13px",
+    fontSize: "10px",
     fontWeight: "700",
     color: "#6b7280",
     textTransform: "uppercase",
-    letterSpacing: "0.5px",
+    letterSpacing: "0.3px",
   },
 
   tableRow: {
@@ -446,39 +514,44 @@ const styles = {
   },
 
   tableCell: {
-    padding: "20px 16px",
+    padding: "14px 8px",
   },
 
   rankBadge: {
-    fontSize: "24px",
+    fontSize: "18px",
     fontWeight: "800",
   },
 
   memberName: {
-    fontSize: "16px",
+    fontSize: "14px",
     fontWeight: "700",
     color: "#1f2937",
   },
 
   orderCount: {
-    fontSize: "18px",
+    fontSize: "16px",
     fontWeight: "700",
     color: "#667eea",
   },
 
   timeValue: {
-    fontSize: "16px",
+    fontSize: "13px",
     fontWeight: "600",
     color: "#6b7280",
   },
 
+  performanceContainer: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "4px",
+  },
+
   performanceBar: {
     width: "100%",
-    height: "8px",
+    height: "6px",
     background: "#e5e7eb",
-    borderRadius: "4px",
+    borderRadius: "3px",
     overflow: "hidden",
-    marginBottom: "6px",
   },
 
   performanceFill: {
@@ -488,51 +561,51 @@ const styles = {
   },
 
   performanceText: {
-    fontSize: "13px",
+    fontSize: "11px",
     fontWeight: "700",
     color: "#667eea",
   },
 
   emptyState: {
     textAlign: "center",
-    padding: "60px 20px",
+    padding: "40px 20px",
   },
 
   emptyIcon: {
-    fontSize: "64px",
-    marginBottom: "20px",
+    fontSize: "48px",
+    marginBottom: "16px",
   },
 
   emptyText: {
-    fontSize: "16px",
+    fontSize: "14px",
     color: "#6b7280",
-    marginBottom: "24px",
+    marginBottom: "20px",
   },
 
   emptyBtn: {
     display: "inline-block",
-    padding: "14px 28px",
+    padding: "12px 24px",
     background: "#667eea",
     color: "#fff",
-    borderRadius: "12px",
+    borderRadius: "10px",
     textDecoration: "none",
     fontWeight: "700",
-    fontSize: "16px",
+    fontSize: "14px",
   },
 
   insightsCard: {
     background: "#f0fdf4",
     border: "2px solid #86efac",
-    borderRadius: "20px",
-    padding: "24px",
-    marginBottom: "24px",
+    borderRadius: "14px",
+    padding: "16px",
+    marginBottom: "16px",
   },
 
   insightsTitle: {
-    fontSize: "20px",
+    fontSize: "16px",
     fontWeight: "800",
     color: "#166534",
-    marginBottom: "16px",
+    marginBottom: "12px",
   },
 
   insightsList: {
@@ -541,66 +614,136 @@ const styles = {
     margin: 0,
     display: "flex",
     flexDirection: "column",
-    gap: "12px",
+    gap: "8px",
+    fontSize: "13px",
+    color: "#166534",
+    lineHeight: "1.5",
   },
 
   infoBox: {
-    background: "rgba(255, 255, 255, 0.95)",
-    borderRadius: "20px",
-    padding: "24px",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+    background: "rgba(255, 255, 255, 0.98)",
+    borderRadius: "14px",
+    padding: "16px",
+    boxShadow: "0 2px 15px rgba(0,0,0,0.08)",
+  },
+
+  infoTitle: {
+    fontSize: "14px",
+    fontWeight: "700",
+    color: "#1f2937",
+    marginBottom: "8px",
+    display: "block",
   },
 
   infoText: {
     color: "#6b7280",
-    fontSize: "14px",
+    fontSize: "12px",
     lineHeight: "1.6",
-    marginTop: "12px",
-    marginBottom: "16px",
+    marginBottom: "12px",
   },
 
   viewLogsBtn: {
     display: "inline-block",
-    padding: "12px 24px",
+    padding: "10px 20px",
     background: "#667eea",
     color: "#fff",
-    borderRadius: "12px",
+    borderRadius: "10px",
     textDecoration: "none",
     fontWeight: "700",
-    fontSize: "14px",
+    fontSize: "13px",
+  },
+
+  "@media (min-width: 769px)": {
+    container: {
+      margin: "30px auto 0",
+      padding: "0 24px",
+    },
+    pageTitle: {
+      fontSize: "36px",
+      marginBottom: "30px",
+    },
+    periodFilter: {
+      display: "flex",
+      gap: "12px",
+      justifyContent: "center",
+      marginBottom: "30px",
+    },
+    periodBtn: {
+      padding: "12px 24px",
+      fontSize: "15px",
+    },
+    summaryCards: {
+      gridTemplateColumns: "repeat(3, 1fr)",
+      gap: "20px",
+      marginBottom: "30px",
+    },
+    summaryCard: {
+      padding: "30px",
+    },
+    summaryIcon: {
+      fontSize: "40px",
+      marginBottom: "12px",
+    },
+    summaryNumber: {
+      fontSize: "36px",
+      marginBottom: "8px",
+    },
+    summaryLabel: {
+      fontSize: "14px",
+    },
+    section: {
+      padding: "30px",
+      borderRadius: "20px",
+      marginBottom: "24px",
+    },
+    sectionTitle: {
+      fontSize: "24px",
+      marginBottom: "24px",
+    },
+    tableHeader: {
+      padding: "16px",
+      fontSize: "13px",
+    },
+    tableCell: {
+      padding: "20px 16px",
+    },
+    insightsCard: {
+      padding: "24px",
+      borderRadius: "20px",
+      marginBottom: "24px",
+    },
+    insightsTitle: {
+      fontSize: "20px",
+      marginBottom: "16px",
+    },
+    insightsList: {
+      gap: "12px",
+      fontSize: "15px",
+    },
+    infoBox: {
+      padding: "24px",
+      borderRadius: "20px",
+    },
+    infoTitle: {
+      fontSize: "16px",
+      marginBottom: "12px",
+    },
+    infoText: {
+      fontSize: "14px",
+      marginBottom: "16px",
+    },
+    viewLogsBtn: {
+      padding: "12px 24px",
+      fontSize: "14px",
+    },
   },
 
   "@media (max-width: 768px)": {
-    nav: {
-      flexDirection: "column",
-      gap: "16px",
-      padding: "16px",
+    menuBtn: {
+      display: "block",
     },
-
-    navRight: {
-      width: "100%",
-      justifyContent: "center",
-    },
-
-    container: {
-      padding: "0 16px",
-    },
-
-    section: {
-      padding: "20px",
-    },
-
-    table: {
-      fontSize: "14px",
-    },
-
-    tableHeader: {
-      padding: "12px 8px",
-      fontSize: "11px",
-    },
-
-    tableCell: {
-      padding: "16px 8px",
+    navDesktop: {
+      display: "none",
     },
   },
 };
@@ -613,12 +756,23 @@ if (typeof document !== "undefined") {
       100% { transform: rotate(360deg); }
     }
     
-    .tableRow:hover {
-      background: #f9fafb;
-    }
+    @media (hover: hover) {
+      .tableRow:hover {
+        background: #f9fafb;
+      }
 
-    button:hover:not(:disabled) {
-      transform: translateY(-2px);
+      button:hover:not(:disabled) {
+        transform: translateY(-2px);
+      }
+
+      .mobileMenuItem:hover {
+        background: #f9fafb;
+      }
+
+      .emptyBtn:hover, .viewLogsBtn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+      }
     }
   `;
   document.head.appendChild(style);
