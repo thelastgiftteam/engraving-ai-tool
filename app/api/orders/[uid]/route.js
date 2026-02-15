@@ -1,21 +1,32 @@
+import { getOrder } from '@/lib/db';
+import { updateEdgeConfig } from '@/lib/updateEdgeConfig';
+import { get } from '@vercel/edge-config';
+
+export const runtime = 'edge';
+
 export async function GET(req, { params }) {
-  const { uid } = params;
+  try {
+    const { uid } = params;
+    const order = await getOrder(uid);
 
-  if (!global.orders) global.orders = [];
+    if (!order) {
+      return Response.json(
+        { success: false, error: "Order not found" },
+        { status: 404 }
+      );
+    }
 
-  const order = global.orders.find((o) => o.uid === uid);
-
-  if (!order) {
+    return Response.json({ 
+      success: true, 
+      order 
+    });
+  } catch (error) {
+    console.error('Error fetching order:', error);
     return Response.json(
-      { success: false, error: "Order not found" },
-      { status: 404 }
+      { success: false, error: 'Failed to fetch order' },
+      { status: 500 }
     );
   }
-
-  return Response.json({ 
-    success: true, 
-    order 
-  });
 }
 
 export async function PATCH(req, { params }) {
@@ -23,9 +34,10 @@ export async function PATCH(req, { params }) {
     const { uid } = params;
     const body = await req.json();
 
-    if (!global.orders) global.orders = [];
-
-    const orderIndex = global.orders.findIndex((o) => o.uid === uid);
+    const orders = await get('orders') || [];
+    const employees = await get('employees') || [];
+    
+    const orderIndex = orders.findIndex((o) => o.uid === uid);
 
     if (orderIndex === -1) {
       return Response.json(
@@ -34,7 +46,7 @@ export async function PATCH(req, { params }) {
       );
     }
 
-    const order = global.orders[orderIndex];
+    const order = orders[orderIndex];
 
     // Validate status transitions
     if (body.status) {
@@ -49,14 +61,49 @@ export async function PATCH(req, { params }) {
       // Update status
       order.status = body.status;
 
-      // Update timestamps
+      // Update timestamps and team member
       if (body.status === "processing") {
         order.claimedAt = new Date().toISOString();
-        order.teamMember = body.teamMember || order.teamMember;
+        const engraver = employees.find(e => e.id === body.engraverId);
+        order.engraverId = body.engraverId;
+        order.teamMember = engraver?.name || body.teamMember;
       }
 
       if (body.status === "completed") {
         order.completedAt = new Date().toISOString();
+
+        // Log processing time
+        if (order.claimedAt && order.teamMember) {
+          const startTime = new Date(order.claimedAt);
+          const endTime = new Date();
+          const durationMinutes = Math.round((endTime - startTime) / 60000);
+
+          const logs = await get('processingLogs') || [];
+          
+          const productTypes = order.images
+            .map(img => img.productType)
+            .filter(Boolean)
+            .join(', ');
+
+          logs.unshift({
+            orderId: order.uid,
+            orderNumber: order.orderNumber,
+            employeeId: order.engraverId,
+            employeeName: order.teamMember,
+            productTypes: productTypes,
+            startTime: order.claimedAt,
+            endTime: order.completedAt,
+            durationMinutes,
+            createdAt: new Date().toISOString()
+          });
+
+          // Keep only last 1000 logs
+          if (logs.length > 1000) {
+            logs.splice(1000);
+          }
+
+          await updateEdgeConfig('processingLogs', logs);
+        }
       }
     }
 
@@ -65,7 +112,10 @@ export async function PATCH(req, { params }) {
       order.teamMember = body.teamMember;
     }
 
-    global.orders[orderIndex] = order;
+    orders[orderIndex] = order;
+
+    // Update Edge Config
+    await updateEdgeConfig('orders', orders);
 
     return Response.json({ 
       success: true, 
