@@ -1,7 +1,7 @@
 import { get } from '@vercel/edge-config';
 
 export const runtime = 'edge';
-
+ 
 export async function GET() {
   try {
     // Fetch all data from Edge Config
