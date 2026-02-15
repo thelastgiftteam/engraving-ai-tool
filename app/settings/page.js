@@ -7,6 +7,7 @@ export default function SettingsPage() {
   const [employees, setEmployees] = useState([]);
   const [productTypes, setProductTypes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   // Employee form
   const [newEmployeeName, setNewEmployeeName] = useState("");
@@ -80,7 +81,7 @@ export default function SettingsPage() {
   }
 
   async function removeEmployee(id, name) {
-    const confirmed = confirm(`Remove ${name}? They will no longer appear in dropdowns.`);
+    const confirmed = confirm(`Remove ${name}?`);
     if (!confirmed) return;
 
     try {
@@ -95,7 +96,7 @@ export default function SettingsPage() {
       if (data.success) {
         setEmployees(employees.filter(e => e.id !== id));
       } else {
-        alert("Failed to remove employee: " + data.error);
+        alert("Failed to remove: " + data.error);
       }
     } catch (error) {
       console.error("Error removing employee:", error);
@@ -128,7 +129,7 @@ export default function SettingsPage() {
         setProductTypes([...productTypes, data.productType]);
         setNewProductName("");
       } else {
-        alert("Failed to add product type: " + data.error);
+        alert("Failed to add product: " + data.error);
       }
     } catch (error) {
       console.error("Error adding product type:", error);
@@ -139,7 +140,7 @@ export default function SettingsPage() {
   }
 
   async function removeProductType(id, name) {
-    const confirmed = confirm(`Remove ${name}? It will no longer appear in dropdowns.`);
+    const confirmed = confirm(`Remove ${name}?`);
     if (!confirmed) return;
 
     try {
@@ -154,7 +155,7 @@ export default function SettingsPage() {
       if (data.success) {
         setProductTypes(productTypes.filter(pt => pt.id !== id));
       } else {
-        alert("Failed to remove product type: " + data.error);
+        alert("Failed to remove: " + data.error);
       }
     } catch (error) {
       console.error("Error removing product type:", error);
@@ -167,34 +168,57 @@ export default function SettingsPage() {
 
   return (
     <main style={styles.wrapper}>
-      {/* Top Navigation */}
+      {/* Compact Mobile Navigation */}
       <nav style={styles.nav}>
-        <div style={styles.navBrand}>
-          <span style={styles.logo}>🖼️</span>
-          <span style={styles.brandText}>What The Frame</span>
+        <div style={styles.navContent}>
+          <div style={styles.navBrand}>
+            <span style={styles.logo}>🖼️</span>
+            <span style={styles.brandText}>What The Frame</span>
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button 
+            onClick={() => setMenuOpen(!menuOpen)} 
+            style={styles.menuBtn}
+            aria-label="Toggle menu"
+          >
+            {menuOpen ? "✕" : "☰"}
+          </button>
         </div>
 
-        <div style={styles.navRight}>
-          <Link href="/" style={styles.navBtn}>
-            Dashboard
-          </Link>
-
-          <Link href="/upload" style={styles.navBtn}>
-            + New Order
-          </Link>
-
-          <Link href="/analytics" style={styles.navBtn}>
-            📊 Analytics
-          </Link>
-
-          <Link href="/recent" style={styles.navBtn}>
-            📋 Recent
-          </Link>
-
-          <Link href="/settings" style={{...styles.navBtn, ...styles.navBtnActive}}>
-            ⚙️ Settings
-          </Link>
+        {/* Desktop Navigation */}
+        <div style={styles.navDesktop}>
+          <Link href="/" style={styles.navBtn}>Dashboard</Link>
+          <Link href="/upload" style={styles.navBtn}>+ New Order</Link>
+          <Link href="/analytics" style={styles.navBtn}>📊 Analytics</Link>
+          <Link href="/recent" style={styles.navBtn}>📋 Recent</Link>
+          <Link href="/settings" style={{...styles.navBtn, ...styles.navBtnActive}}>⚙️ Settings</Link>
+          <Link href="/backup" style={styles.navBtn}>🔄 Backup</Link>
         </div>
+
+        {/* Mobile Dropdown Menu */}
+        {menuOpen && (
+          <div style={styles.mobileMenu}>
+            <Link href="/" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>🏠</span> Dashboard
+            </Link>
+            <Link href="/upload" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>➕</span> New Order
+            </Link>
+            <Link href="/analytics" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>📊</span> Analytics
+            </Link>
+            <Link href="/recent" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>📋</span> Recent Orders
+            </Link>
+            <Link href="/settings" style={{...styles.mobileMenuItem, ...styles.mobileMenuItemActive}} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>⚙️</span> Settings
+            </Link>
+            <Link href="/backup" style={styles.mobileMenuItem} onClick={() => setMenuOpen(false)}>
+              <span style={styles.mobileMenuIcon}>🔄</span> Backup
+            </Link>
+          </div>
+        )}
       </nav>
 
       <div style={styles.container}>
@@ -213,41 +237,39 @@ export default function SettingsPage() {
               
               {/* Add Employee Form */}
               <form onSubmit={addEmployee} style={styles.form}>
-                <div style={styles.formRow}>
-                  <input
-                    type="text"
-                    placeholder="Employee name"
-                    value={newEmployeeName}
-                    onChange={(e) => setNewEmployeeName(e.target.value)}
-                    style={styles.input}
-                    disabled={addingEmployee}
-                  />
-                  
-                  <select
-                    value={newEmployeeRole}
-                    onChange={(e) => setNewEmployeeRole(e.target.value)}
-                    style={styles.select}
-                    disabled={addingEmployee}
-                  >
-                    <option value="designer">Designer</option>
-                    <option value="engraver">Engraver</option>
-                  </select>
+                <input
+                  type="text"
+                  placeholder="Employee name"
+                  value={newEmployeeName}
+                  onChange={(e) => setNewEmployeeName(e.target.value)}
+                  style={styles.input}
+                  disabled={addingEmployee}
+                />
+                
+                <select
+                  value={newEmployeeRole}
+                  onChange={(e) => setNewEmployeeRole(e.target.value)}
+                  style={styles.select}
+                  disabled={addingEmployee}
+                >
+                  <option value="engraver">Engraver</option>
+                  <option value="designer">Designer</option>
+                </select>
 
-                  <button 
-                    type="submit" 
-                    style={styles.addButton}
-                    disabled={addingEmployee}
-                  >
-                    {addingEmployee ? "Adding..." : "+ Add"}
-                  </button>
-                </div>
+                <button 
+                  type="submit" 
+                  style={styles.addButton}
+                  disabled={addingEmployee}
+                >
+                  {addingEmployee ? "Adding..." : "+ Add"}
+                </button>
               </form>
 
               {/* Designers List */}
               <div style={styles.subsection}>
                 <h3 style={styles.subsectionTitle}>✏️ Designers ({designers.length})</h3>
                 {designers.length === 0 ? (
-                  <p style={styles.emptyText}>No designers yet. Add one above!</p>
+                  <p style={styles.emptyText}>No designers yet</p>
                 ) : (
                   <div style={styles.list}>
                     {designers.map(employee => (
@@ -272,7 +294,7 @@ export default function SettingsPage() {
               <div style={styles.subsection}>
                 <h3 style={styles.subsectionTitle}>⚙️ Engravers ({engravers.length})</h3>
                 {engravers.length === 0 ? (
-                  <p style={styles.emptyText}>No engravers yet. Add one above!</p>
+                  <p style={styles.emptyText}>No engravers yet</p>
                 ) : (
                   <div style={styles.list}>
                     {engravers.map(employee => (
@@ -300,36 +322,32 @@ export default function SettingsPage() {
               
               {/* Add Product Form */}
               <form onSubmit={addProductType} style={styles.form}>
-                <div style={styles.formRow}>
-                  <input
-                    type="text"
-                    placeholder="Product type name (e.g., Keychain, Photo Frame)"
-                    value={newProductName}
-                    onChange={(e) => setNewProductName(e.target.value)}
-                    style={{...styles.input, flex: 1}}
-                    disabled={addingProduct}
-                  />
+                <input
+                  type="text"
+                  placeholder="Product name (e.g., Keychain)"
+                  value={newProductName}
+                  onChange={(e) => setNewProductName(e.target.value)}
+                  style={styles.input}
+                  disabled={addingProduct}
+                />
 
-                  <button 
-                    type="submit" 
-                    style={styles.addButton}
-                    disabled={addingProduct}
-                  >
-                    {addingProduct ? "Adding..." : "+ Add"}
-                  </button>
-                </div>
+                <button 
+                  type="submit" 
+                  style={styles.addButton}
+                  disabled={addingProduct}
+                >
+                  {addingProduct ? "Adding..." : "+ Add"}
+                </button>
               </form>
 
               {/* Products List */}
               {productTypes.length === 0 ? (
-                <p style={styles.emptyText}>No product types yet. Add one above!</p>
+                <p style={styles.emptyText}>No product types yet</p>
               ) : (
                 <div style={styles.list}>
                   {productTypes.map(product => (
                     <div key={product.id} style={styles.listItem}>
-                      <div style={styles.itemInfo}>
-                        <span style={styles.itemName}>{product.name}</span>
-                      </div>
+                      <span style={styles.itemName}>{product.name}</span>
                       <button
                         onClick={() => removeProductType(product.id, product.name)}
                         style={styles.removeButton}
@@ -344,12 +362,12 @@ export default function SettingsPage() {
 
             {/* Info Box */}
             <div style={styles.infoBox}>
-              <strong>💡 How it works:</strong>
+              <strong style={styles.infoTitle}>💡 How it works</strong>
               <ul style={styles.infoList}>
-                <li><strong>Designers</strong> are shown when creating new orders</li>
-                <li><strong>Engravers</strong> can claim and process orders</li>
-                <li><strong>Product Types</strong> are selected for each image in an order</li>
-                <li>All data is tracked for incentive calculation and Google Sheets export</li>
+                <li><strong>Designers</strong> create orders</li>
+                <li><strong>Engravers</strong> process orders</li>
+                <li><strong>Product Types</strong> categorize images</li>
+                <li>All data tracked for incentives</li>
               </ul>
             </div>
           </div>
@@ -367,30 +385,33 @@ const styles = {
   },
 
   nav: {
-    background: "rgba(255, 255, 255, 0.95)",
+    background: "rgba(255, 255, 255, 0.98)",
     backdropFilter: "blur(10px)",
-    padding: "16px 24px",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
     boxShadow: "0 2px 20px rgba(0,0,0,0.1)",
     position: "sticky",
     top: 0,
     zIndex: 100,
   },
 
+  navContent: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: "12px 16px",
+  },
+
   navBrand: {
     display: "flex",
     alignItems: "center",
-    gap: "12px",
+    gap: "10px",
   },
 
   logo: {
-    fontSize: "28px",
+    fontSize: "24px",
   },
 
   brandText: {
-    fontSize: "20px",
+    fontSize: "18px",
     fontWeight: "800",
     background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
     WebkitBackgroundClip: "text",
@@ -398,43 +419,82 @@ const styles = {
     backgroundClip: "text",
   },
 
-  navRight: {
+  menuBtn: {
+    fontSize: "24px",
+    background: "none",
+    border: "none",
+    color: "#667eea",
+    cursor: "pointer",
+    padding: "8px",
+    display: "none",
+  },
+
+  navDesktop: {
     display: "flex",
-    gap: "12px",
+    gap: "8px",
+    padding: "0 16px 12px",
     flexWrap: "wrap",
   },
 
   navBtn: {
-    padding: "10px 20px",
-    borderRadius: "12px",
+    padding: "8px 16px",
+    borderRadius: "10px",
     textDecoration: "none",
     fontWeight: "600",
-    fontSize: "14px",
+    fontSize: "13px",
     transition: "all 0.2s",
     background: "transparent",
     color: "#1f2937",
-    border: "none",
-    cursor: "pointer",
+    whiteSpace: "nowrap",
   },
 
   navBtnActive: {
     background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
     color: "#fff",
-    boxShadow: "0 4px 15px rgba(102, 126, 234, 0.4)",
+    boxShadow: "0 2px 10px rgba(102, 126, 234, 0.4)",
+  },
+
+  mobileMenu: {
+    background: "#fff",
+    borderTop: "1px solid #e5e7eb",
+  },
+
+  mobileMenuItem: {
+    display: "flex",
+    alignItems: "center",
+    gap: "12px",
+    padding: "14px 20px",
+    textDecoration: "none",
+    color: "#1f2937",
+    fontWeight: "600",
+    fontSize: "15px",
+    borderBottom: "1px solid #f3f4f6",
+    transition: "background 0.2s",
+  },
+
+  mobileMenuItemActive: {
+    background: "#f0f9ff",
+    color: "#667eea",
+  },
+
+  mobileMenuIcon: {
+    fontSize: "18px",
+    width: "24px",
+    textAlign: "center",
   },
 
   container: {
     maxWidth: "1000px",
-    margin: "30px auto 0",
-    padding: "0 24px",
+    margin: "20px auto 0",
+    padding: "0 16px",
   },
 
   pageTitle: {
-    fontSize: "36px",
+    fontSize: "24px",
     fontWeight: "800",
     color: "#fff",
     textAlign: "center",
-    marginBottom: "30px",
+    marginBottom: "20px",
   },
 
   loadingState: {
@@ -444,187 +504,256 @@ const styles = {
   },
 
   spinner: {
-    width: "50px",
-    height: "50px",
-    border: "4px solid rgba(255,255,255,0.3)",
-    borderTop: "4px solid #fff",
+    width: "40px",
+    height: "40px",
+    border: "3px solid rgba(255,255,255,0.3)",
+    borderTop: "3px solid #fff",
     borderRadius: "50%",
     animation: "spin 1s linear infinite",
-    margin: "0 auto 20px",
+    margin: "0 auto 16px",
   },
 
   sections: {
     display: "flex",
     flexDirection: "column",
-    gap: "24px",
+    gap: "16px",
   },
 
   section: {
     background: "#fff",
-    borderRadius: "20px",
-    padding: "30px",
-    boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+    borderRadius: "16px",
+    padding: "20px",
+    boxShadow: "0 2px 15px rgba(0,0,0,0.08)",
   },
 
   sectionTitle: {
-    fontSize: "24px",
+    fontSize: "18px",
     fontWeight: "800",
     color: "#1f2937",
-    marginBottom: "24px",
-  },
-
-  subsection: {
-    marginTop: "24px",
-  },
-
-  subsectionTitle: {
-    fontSize: "18px",
-    fontWeight: "700",
-    color: "#374151",
     marginBottom: "16px",
   },
 
-  form: {
-    marginBottom: "24px",
+  subsection: {
+    marginTop: "20px",
   },
 
-  formRow: {
+  subsectionTitle: {
+    fontSize: "15px",
+    fontWeight: "700",
+    color: "#374151",
+    marginBottom: "12px",
+  },
+
+  form: {
     display: "flex",
-    gap: "12px",
-    alignItems: "center",
+    flexDirection: "column",
+    gap: "10px",
+    marginBottom: "20px",
   },
 
   input: {
-    padding: "14px 16px",
-    fontSize: "15px",
+    padding: "12px 14px",
+    fontSize: "14px",
     border: "2px solid #e5e7eb",
-    borderRadius: "12px",
+    borderRadius: "10px",
     transition: "all 0.2s",
     fontFamily: "inherit",
-    flex: 1,
   },
 
   select: {
-    padding: "14px 16px",
-    fontSize: "15px",
+    padding: "12px 14px",
+    fontSize: "14px",
     border: "2px solid #e5e7eb",
-    borderRadius: "12px",
+    borderRadius: "10px",
     fontWeight: "600",
     cursor: "pointer",
-    minWidth: "150px",
+    backgroundColor: "#fff",
   },
 
   addButton: {
-    padding: "14px 24px",
+    padding: "12px 20px",
     background: "#667eea",
     color: "#fff",
     border: "none",
-    borderRadius: "12px",
-    fontSize: "15px",
+    borderRadius: "10px",
+    fontSize: "14px",
     fontWeight: "700",
     cursor: "pointer",
     transition: "all 0.2s",
-    whiteSpace: "nowrap",
   },
 
   list: {
     display: "flex",
     flexDirection: "column",
-    gap: "12px",
+    gap: "10px",
   },
 
   listItem: {
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: "16px",
+    padding: "12px",
     background: "#f9fafb",
-    borderRadius: "12px",
+    borderRadius: "10px",
     border: "2px solid #e5e7eb",
+    gap: "10px",
   },
 
   itemInfo: {
     display: "flex",
     alignItems: "center",
-    gap: "12px",
+    gap: "8px",
+    flex: 1,
+    minWidth: 0,
   },
 
   itemName: {
-    fontSize: "16px",
+    fontSize: "14px",
     fontWeight: "600",
     color: "#1f2937",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
   },
 
   itemBadge: {
-    padding: "4px 12px",
+    padding: "3px 8px",
     background: "#dbeafe",
     color: "#1e40af",
-    borderRadius: "12px",
-    fontSize: "12px",
+    borderRadius: "8px",
+    fontSize: "10px",
     fontWeight: "700",
+    whiteSpace: "nowrap",
   },
 
   removeButton: {
-    padding: "8px 16px",
+    padding: "6px 12px",
     background: "#fee2e2",
     color: "#dc2626",
     border: "2px solid #fecaca",
     borderRadius: "8px",
-    fontSize: "13px",
+    fontSize: "12px",
     fontWeight: "700",
     cursor: "pointer",
     transition: "all 0.2s",
+    whiteSpace: "nowrap",
+    flexShrink: 0,
   },
 
   emptyText: {
     color: "#9ca3af",
-    fontSize: "14px",
+    fontSize: "13px",
     fontStyle: "italic",
-    padding: "20px",
+    padding: "16px",
     textAlign: "center",
   },
 
   infoBox: {
-    padding: "24px",
-    background: "rgba(255, 255, 255, 0.95)",
-    borderRadius: "20px",
+    padding: "16px",
+    background: "rgba(255, 255, 255, 0.98)",
+    borderRadius: "16px",
     border: "2px solid rgba(255,255,255,0.5)",
     color: "#1f2937",
+    fontSize: "13px",
+    lineHeight: "1.7",
+  },
+
+  infoTitle: {
+    display: "block",
     fontSize: "14px",
-    lineHeight: "1.8",
+    fontWeight: "700",
+    marginBottom: "8px",
   },
 
   infoList: {
-    marginTop: "12px",
-    paddingLeft: "20px",
+    paddingLeft: "18px",
+    margin: "0",
+  },
+
+  "@media (min-width: 769px)": {
+    container: {
+      margin: "30px auto 0",
+      padding: "0 24px",
+    },
+    pageTitle: {
+      fontSize: "36px",
+      marginBottom: "30px",
+    },
+    sections: {
+      gap: "24px",
+    },
+    section: {
+      padding: "30px",
+      borderRadius: "20px",
+    },
+    sectionTitle: {
+      fontSize: "24px",
+      marginBottom: "24px",
+    },
+    subsection: {
+      marginTop: "24px",
+    },
+    subsectionTitle: {
+      fontSize: "18px",
+      marginBottom: "16px",
+    },
+    form: {
+      flexDirection: "row",
+      gap: "12px",
+      marginBottom: "24px",
+    },
+    input: {
+      flex: 1,
+      padding: "14px 16px",
+      fontSize: "15px",
+    },
+    select: {
+      minWidth: "150px",
+      padding: "14px 16px",
+      fontSize: "15px",
+    },
+    addButton: {
+      padding: "14px 24px",
+      fontSize: "15px",
+    },
+    list: {
+      gap: "12px",
+    },
+    listItem: {
+      padding: "16px",
+    },
+    itemName: {
+      fontSize: "16px",
+    },
+    itemBadge: {
+      padding: "4px 12px",
+      fontSize: "12px",
+    },
+    removeButton: {
+      padding: "8px 16px",
+      fontSize: "13px",
+    },
+    emptyText: {
+      fontSize: "14px",
+      padding: "20px",
+    },
+    infoBox: {
+      padding: "24px",
+      borderRadius: "20px",
+      fontSize: "14px",
+    },
+    infoTitle: {
+      fontSize: "16px",
+      marginBottom: "12px",
+    },
   },
 
   "@media (max-width: 768px)": {
-    nav: {
-      flexDirection: "column",
-      gap: "16px",
-      padding: "16px",
+    menuBtn: {
+      display: "block",
     },
-
-    navRight: {
-      width: "100%",
-      justifyContent: "center",
-    },
-
-    formRow: {
-      flexDirection: "column",
-    },
-
-    select: {
-      width: "100%",
-    },
-
-    container: {
-      padding: "0 16px",
-    },
-
-    section: {
-      padding: "20px",
+    navDesktop: {
+      display: "none",
     },
   },
 };
@@ -643,18 +772,24 @@ if (typeof document !== "undefined") {
       box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
 
-    button:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
+    @media (hover: hover) {
+      button:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      }
 
-    .removeButton:hover {
-      background: #fca5a5;
-      border-color: #f87171;
-    }
+      .removeButton:hover {
+        background: #fca5a5;
+        border-color: #f87171;
+      }
 
-    .addButton:hover:not(:disabled) {
-      background: #5568d3;
+      .addButton:hover:not(:disabled) {
+        background: #5568d3;
+      }
+
+      .mobileMenuItem:hover {
+        background: #f9fafb;
+      }
     }
   `;
   document.head.appendChild(style);
